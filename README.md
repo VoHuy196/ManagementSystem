@@ -4,7 +4,7 @@ A modern, real-time collaborative project management system built with the MERN 
 
 ## 🌐 Live Demo
 
-**🚀 [Try the Live Application](https://collab-todo-app.vercel.app/)**
+**🚀 [Try the Live Application](https://project-management-system-v2.vercel.app/)**
 
 Experience the full functionality including real-time collaboration, comprehensive project management, drag & drop task organization, and live activity tracking across multiple teams.
 
