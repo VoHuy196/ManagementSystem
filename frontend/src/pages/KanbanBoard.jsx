@@ -39,16 +39,16 @@ const KanbanBoard = () => {
     loadTasks();
   }, []);
 
-  const statuses = ["Todo", "in-progress", "Done"];
+  const statuses = ["Todo", "In Progress", "Done"];
   const safeTasks = Array.isArray(tasks) ? tasks : [];
 
   const getTasksForStatus = (status) => {
     return safeTasks.filter((task) => task.status === status);
   };
 
-  const getTaskCount = (status) => {
-    return getTasksForStatus(status).length;
-  };
+  // const getTaskCount = (status) => {
+  //   return getTasksForStatus(status).length;
+  // };
 
   const handleDeleteTask = async (taskId) => {
     try {
@@ -157,7 +157,7 @@ const KanbanBoard = () => {
       });
 
       toast.success(
-        `Task moved to ${newStatus === "in-progress" ? "In Progress" : newStatus}`
+        `Task moved to ${newStatus === "In Progress" ? "In Progress" : newStatus}`
       );
     } catch (error) {
       setTasks((prevTasks) =>
@@ -236,7 +236,7 @@ const KanbanBoard = () => {
             >
               <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-700">
                 <h3 className="text-lg font-semibold text-white">
-                  {status === "in-progress"
+                  {status === "In Progress"
                     ? "In Progress"
                     : status.charAt(0).toUpperCase() + status.slice(1)}
                 </h3>
