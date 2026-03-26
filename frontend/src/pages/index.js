@@ -5,5 +5,7 @@ import KanbanBoard from "./KanbanBoard";
 import ActionLog from "./ActionLog";
 import Logout from "./Logout.jsx";
 import Projects from "./Projects";
+import Employees from "./Employees.jsx";
+import Worklogs from "./Worklogs.jsx";
 
-export { Home, Register, Login, KanbanBoard, ActionLog, Logout, Projects };
+export { Home, Register, Login, KanbanBoard, ActionLog, Logout, Projects, Employees, Worklogs };

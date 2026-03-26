@@ -20,7 +20,7 @@ const getTasks = asyncHandler(async (req, res) => {
 });
 
 const createTask = asyncHandler(async (req, res) => {
-  const { title, description, priority } = req.body;
+  const { title, description, priority, taskType, startDate, dueDate, sprint, labels } = req.body;
 
   if (!title || !description || !priority) {
     throw new ApiError(400, "Please provide all required fields");
@@ -47,6 +47,11 @@ const createTask = asyncHandler(async (req, res) => {
     title,
     description,
     priority,
+    taskType,
+    startDate,
+    dueDate,
+    sprint,
+    labels: labels || [],
     createdBy,
   });
 
@@ -85,7 +90,7 @@ const updateTask = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Task ID is required");
   }
 
-  const { title, description, status, priority, lastModified, forceUpdate } =
+  const { title, description, status, priority, taskType, startDate, dueDate, sprint, labels, lastModified, forceUpdate } =
     req.body;
 
   if (!title && !description && !status && !priority) {
@@ -150,6 +155,26 @@ const updateTask = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Invalid priority value");
     }
     task.priority = priority;
+  }
+
+  if (taskType !== undefined) {
+    const validTaskTypes = ["Story", "Bug", "Task", "Epic"];
+    if (taskType && !validTaskTypes.includes(taskType)) {
+      throw new ApiError(400, "Invalid task type");
+    }
+    task.taskType = taskType;
+  }
+  if (startDate !== undefined) {
+    task.startDate = startDate;
+  }
+  if (dueDate !== undefined) {
+    task.dueDate = dueDate;
+  }
+  if (sprint !== undefined) {
+    task.sprint = sprint;
+  }
+  if (labels !== undefined) {
+    task.labels = labels;
   }
 
   const updatedTask = await task.save();

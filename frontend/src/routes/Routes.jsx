@@ -12,6 +12,8 @@ import {
   ActionLog,
   Logout,
   Projects,
+  Employees,
+  Worklogs,
 } from "../pages";
 import Layout from "../layout";
 import ProtectedRoutes from "./ProtectedRoutes";
@@ -52,6 +54,22 @@ const AppRoutes = createBrowserRouter(
         element={
           <ProtectedRoutes>
             <Projects />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoutes>
+            <Employees />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/worklogs"
+        element={
+          <ProtectedRoutes>
+            <Worklogs />
           </ProtectedRoutes>
         }
       />

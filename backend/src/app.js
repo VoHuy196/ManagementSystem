@@ -35,12 +35,16 @@ import authRoutes from "./routes/auth.route.js";
 import actionLogRoutes from "./routes/actionLog.route.js";
 import taskRoutes from "./routes/task.route.js";
 import projectRoutes from "./routes/projects.route.js";
+import employeeRoutes from "./routes/employees.route.js";
+import worklogRoutes from "./routes/worklog.route.js";
 
 // implement routing
 app.use("/api/auth", authRoutes);
 app.use("/api/actionlogs", actionLogRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
+app.use("/api/employees", employeeRoutes);
+app.use("/api/worklogs", worklogRoutes);
 
 app.use(errorHandler);
 

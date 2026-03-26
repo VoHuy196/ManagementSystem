@@ -24,7 +24,27 @@ const taskSchema = new mongoose.Schema(
       enum: ["Low", "Medium", "High"],
       required: true,
     },
+    taskType: {
+      type: String,
+      enum: ["Story", "Bug", "Task", "Epic"],
+      default: "Task",
+    },
+    startDate: {
+      type: Date,
+    },
+    dueDate: {
+      type: Date,
+    },
+    sprint: {
+      type: String,
+      trim: true,
+    },
+    labels: [{
+      type: String,
+      trim: true,
+    }],
     createdBy: {
+
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,

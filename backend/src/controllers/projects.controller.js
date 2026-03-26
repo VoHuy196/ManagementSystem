@@ -6,7 +6,7 @@ import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
 
 const createProject = asyncHandler(async (req, res) => {
-  const { name, description, members } = req.body;
+  const { name, description, members, startDate, endDate, department, budget } = req.body;
 
   if (!name) {
     throw new ApiError(400, "Project name is required");
@@ -29,6 +29,10 @@ const createProject = asyncHandler(async (req, res) => {
     description,
     owner,
     members: members || [],
+    startDate,
+    endDate,
+    department,
+    budget,
   });
 
   if (!project) {
@@ -164,7 +168,7 @@ const assignTaskToProject = asyncHandler(async (req, res) => {
 
 const updateProject = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { name, description, status, members } = req.body;
+  const { name, description, status, members, startDate, endDate, department, budget } = req.body;
 
   if (!id) {
     throw new ApiError(400, "Project ID is required");
@@ -210,6 +214,22 @@ const updateProject = asyncHandler(async (req, res) => {
 
   if (members) {
     project.members = members;
+  }
+
+  if (startDate !== undefined) {
+    project.startDate = startDate;
+  }
+  if (endDate !== undefined) {
+    project.endDate = endDate;
+  }
+  if (department !== undefined) {
+    project.department = department;
+  }
+  if (budget !== undefined) {
+    if (budget < 0) {
+      throw new ApiError(400, "Budget cannot be negative");
+    }
+    project.budget = budget;
   }
 
   const updatedProject = await project.save();

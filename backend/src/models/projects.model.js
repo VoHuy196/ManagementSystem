@@ -28,7 +28,22 @@ const projectSchema = new mongoose.Schema(
       enum: ["active", "completed", "archived"],
       default: "active",
     },
+    startDate: {
+      type: Date,
+    },
+    endDate: {
+      type: Date,
+    },
+    department: {
+      type: String,
+      trim: true,
+    },
+    budget: {
+      type: Number,
+      min: 0,
+    },
   },
+
   {
     timestamps: true,
   }

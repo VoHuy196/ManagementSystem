@@ -14,8 +14,8 @@ const ProjectsList = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newProject, setNewProject] = useState({ name: "", description: "" });
   const [editingProject, setEditingProject] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(null);
   const [showProjectTasks, setShowProjectTasks] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const { user } = useAuth();
 
   useEffect(() => {
