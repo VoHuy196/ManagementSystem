@@ -60,6 +60,12 @@ const createProject = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to create action log for project creation");
   }
 
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('projectCreated', { project: createdProject });
+  }
+
   res
     .status(201)
     .json(

@@ -49,6 +49,12 @@ const createWorklog = asyncHandler(async (req, res) => {
     .populate("task", "title")
     .populate("employee", "name employeeCode");
 
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('worklogCreated', { worklog: createdWorklog });
+  }
+
   res
     .status(201)
     .json(new ApiResponse(201, { worklog: createdWorklog }, "Worklog created successfully"));

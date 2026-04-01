@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { createWorklog } from "../services/worklogApi.js";
+import { getEmployees } from "../services/employeeApi.js";
 import toast from "react-hot-toast";
 
 const WorklogModal = ({ onClose, taskId }) => {
@@ -9,6 +10,24 @@ const WorklogModal = ({ onClose, taskId }) => {
     description: "",
     employee: "",
   });
+  const [employees, setEmployees] = useState([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await getEmployees();
+      const employeesData = response.data?.data?.employees || response.data?.employees || [];
+      setEmployees(employeesData);
+    } catch (err) {
+      toast.error("Failed to load employees");
+    } finally {
+      setLoadingEmployees(false);
+    }
+  };
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -34,10 +53,10 @@ const WorklogModal = ({ onClose, taskId }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="border rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="border rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto bg-white">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold">Log Work Hours</h3>
+            <h3 className="text-xl font-bold text-black">Log Work Hours</h3>
             <button
               onClick={onClose}
               className="p-1 text-gray-600 hover:text-blue-600 transition-all"
@@ -56,7 +75,7 @@ const WorklogModal = ({ onClose, taskId }) => {
               <input
                 name="entryDate"
                 type="date"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all text-black"
                 value={form.entryDate}
                 onChange={handleChange}
               />
@@ -71,7 +90,7 @@ const WorklogModal = ({ onClose, taskId }) => {
                 type="number"
                 min="0.1"
                 step="0.1"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all text-black"
                 placeholder="e.g. 4.5"
                 value={form.hours}
                 onChange={handleChange}
@@ -80,16 +99,27 @@ const WorklogModal = ({ onClose, taskId }) => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Employee ID *
+                Employee *
               </label>
-              <input
-                name="employee"
-                type="text"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
-                placeholder="Employee ID"
-                value={form.employee}
-                onChange={handleChange}
-              />
+              {loadingEmployees ? (
+                <div className="w-full p-3 border border-gray-300 rounded-md text-center text-gray-500">
+                  Loading employees...
+                </div>
+              ) : (
+                <select
+                  name="employee"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all text-black"
+                  value={form.employee}
+                  onChange={handleChange}
+                >
+                  <option value="">Select an employee</option>
+                  {employees.map((emp) => (
+                    <option key={emp._id} value={emp._id}>
+                      {emp.name} ({emp.employeeCode})
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div>
@@ -99,7 +129,7 @@ const WorklogModal = ({ onClose, taskId }) => {
               <textarea
                 name="description"
                 rows="3"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all resize-none"
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all resize-none text-black"
                 placeholder="What did you work on?"
                 value={form.description}
                 onChange={handleChange}
@@ -110,7 +140,7 @@ const WorklogModal = ({ onClose, taskId }) => {
           <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-all"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-all text-black"
             >
               Cancel
             </button>

@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { createProject, updateProject } from "../services/projectApi.js";
+import { createProject, updateProject, deleteProject } from "../services/projectApi.js";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const ProjectModal = ({ project, onClose }) => {
+  const queryClient = useQueryClient();
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -11,6 +13,16 @@ const ProjectModal = ({ project, onClose }) => {
     endDate: "",
     department: "",
     budget: "",
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteProject(project._id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
+      toast.success("Project deleted successfully");
+      onClose();
+    },
+    onError: () => toast.error("Failed to delete project"),
   });
 
   useEffect(() => {
@@ -51,17 +63,26 @@ const ProjectModal = ({ project, onClose }) => {
       return;
     }
 
+    const data = { ...form };
+    if (form.budget) data.budget = parseFloat(form.budget);
+
     try {
       if (project?._id) {
-        await updateProject(project._id, form);
+        await updateProject(project._id, data);
         toast.success("Project updated successfully");
       } else {
-        await createProject(form);
+        await createProject(data);
         toast.success("Project created successfully");
       }
       onClose();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save project");
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      deleteMutation.mutate();
     }
   };
 
@@ -214,6 +235,14 @@ const ProjectModal = ({ project, onClose }) => {
             >
               {isEditing ? "Update Project" : "Create Project"}
             </button>
+            {isEditing && (
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-all font-medium text-white"
+              >
+                Delete Project
+              </button>
+            )}
           </div>
         </div>
       </div>

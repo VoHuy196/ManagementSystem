@@ -8,7 +8,7 @@ const ProjectDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-
+const [activeIndex, setActiveIndex] = useState(null);
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -324,11 +324,16 @@ const ProjectDashboard = () => {
             data={pieData}
             cx="50%"
             cy="50%"
+            innerRadius={60}
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"
             nameKey="name"
-            // paddingAngle={3}
+            paddingAngle={2}
+            activeIndex={activeIndex}
+            onMouseEnter={(_, index) => setActiveIndex(index)}
+            onMouseLeave={() => setActiveIndex(null)}
+            // isAnimationActive={false}
           >
             {pieData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -357,7 +362,7 @@ const ProjectDashboard = () => {
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip /> 
         </PieChart>
       </ResponsiveContainer>
     </div>

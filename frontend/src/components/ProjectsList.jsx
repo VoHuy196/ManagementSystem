@@ -75,6 +75,8 @@ const ProjectsList = () => {
       );
       setEditingProject(null);
       toast.success("Project updated successfully");
+      // Invalidate projects list to refresh
+      // window.location.reload();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update project");
     }

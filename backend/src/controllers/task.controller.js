@@ -78,6 +78,12 @@ const createTask = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to create action log for task creation");
   }
 
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('taskCreated', { task: createdTask });
+  }
+
   res
     .status(201)
     .json(new ApiResponse(201, { task }, "Task created successfully"));
@@ -197,6 +203,12 @@ const updateTask = asyncHandler(async (req, res) => {
     .populate("assignedTo", "fullName")
     .populate("createdBy", "fullName");
 
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('taskUpdated', { task: populatedTask });
+  }
+
   res
     .status(200)
     .json(
@@ -245,6 +257,12 @@ const updateTaskStatus = asyncHandler(async (req, res) => {
     );
   }
 
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('taskUpdated', { task: updatedTask });
+  }
+
   res
     .status(200)
     .json(
@@ -283,6 +301,12 @@ const deleteTask = asyncHandler(async (req, res) => {
 
   if (!actionLog) {
     throw new ApiError(500, "Failed to create action log for task deletion");
+  }
+
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('taskDeleted', { taskId: id });
   }
 
   res.status(200).json(new ApiResponse(200, {}, "Task deleted successfully"));
@@ -327,6 +351,12 @@ const assignTask = asyncHandler(async (req, res) => {
 
   if (!actionLog) {
     throw new ApiError(500, "Failed to create action log for task assignment");
+  }
+
+  // Emit socket event for real-time update
+  const io = req.app.get('io');
+  if (io) {
+    io.emit('taskAssigned', { task: updatedTask });
   }
 
   res

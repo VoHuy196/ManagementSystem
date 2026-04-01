@@ -1,16 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ProjectsList,
   OnlineUsers,
   ProjectTasks,
   ProjectDashboard,
 } from "../components";
+import ProjectModal from "../modal/ProjectModal.jsx";
 import useSocket from "../hooks/useSocket";
 import { useAuth } from "../context/AuthContext";
 
 const Projects = () => {
   const { user } = useAuth();
   const { onlineUsers } = useSocket(() => {}, user);
+  const [showProjectModal, setShowProjectModal] = useState(false);
 
   return (
     <div className="min-h-screen bg-black">
@@ -23,7 +25,7 @@ const Projects = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Projects Content */}
           <div className="lg:col-span-3">
-            <ProjectsList />
+            <ProjectsList onCreateClick={() => setShowProjectModal(true)} />
           </div>
 
           {/* Sidebar */}
@@ -34,6 +36,11 @@ const Projects = () => {
           </div>
         </div>
       </div>
+
+      {/* Project Modal */}
+      {showProjectModal && (
+        <ProjectModal project={{}} onClose={() => setShowProjectModal(false)} />
+      )}
     </div>
   );
 };
