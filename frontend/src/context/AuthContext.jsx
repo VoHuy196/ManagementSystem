@@ -8,47 +8,64 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  // Restore auth state on mount - synchronously read before rendering
+  // Hàm hỗ trợ clear data để code gọn hơn
+  const handleClearAuth = () => {
+    localStorage.removeItem("user");
+    cookies.remove("token", { path: "/" });
+    setUser(null);
+  };
+
+  // Restore auth state on mount
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    const token = cookies.get("token");
+    const tokenFromCookie = cookies.get("token");
 
-    if (stored && stored !== "undefined" && token) {
+    if (stored && stored !== "undefined") {
       try {
         const userData = JSON.parse(stored);
-        // Restore token to userData if missing
-        if (!userData.token) {
-          userData.token = token;
+        
+        // Cố gắng tìm token từ Cookie, nếu không có thì tìm trong localStorage
+        const token = tokenFromCookie || userData.token || userData.accessToken;
+
+        // Nếu có userData, cho phép duy trì đăng nhập 
+        // Rất quan trọng nếu backend dùng HttpOnly cookie vì tokenFromCookie sẽ undefined
+        if (userData) {
+          // Khôi phục token vào object nếu nó bị thiếu
+          if (!userData.token && token) {
+            userData.token = token;
+          }
+          setUser(userData);
+        } else {
+          handleClearAuth();
         }
-        setUser(userData);
       } catch (err) {
         console.error("Failed to restore user:", err);
-        localStorage.removeItem("user");
-        cookies.remove("token", { path: "/" });
+        handleClearAuth();
       }
     } else {
-      // Clear invalid data
-      if (!token || !stored) {
-        localStorage.removeItem("user");
-        cookies.remove("token", { path: "/" });
-      }
+      handleClearAuth();
     }
-    // Mark auth restoration as complete
+    
+    // Đánh dấu đã load xong Auth
     setIsAuthLoading(false);
   }, []);
 
   const login = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
-    // Use secure only on HTTPS, not on localhost HTTP
-    const isSecure = window.location.protocol === "https:";
-    cookies.set("token", userData.token, { path: "/", secure: isSecure });
+    
+    // Đảm bảo lấy đúng field token để set vào cookie
+    const tokenToSet = userData.token || userData.accessToken;
+    
+    if (tokenToSet) {
+      const isSecure = window.location.protocol === "https:";
+      cookies.set("token", tokenToSet, { path: "/", secure: isSecure });
+    }
+    
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem("user");
-    cookies.remove("token", { path: "/" });
-    setUser(null);
+    handleClearAuth();
   };
 
   return (

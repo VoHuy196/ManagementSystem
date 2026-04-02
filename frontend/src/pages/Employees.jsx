@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getEmployees, createEmployee, updateEmployee } from "../services/employeeApi.js";
+import { getEmployees } from "../services/employeeApi.js";
 import EmployeeModal from "../modal/EmployeeModal.jsx";
 // import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -18,32 +18,12 @@ const Employees = () => {
   const fetchEmployees = async () => {
     try {
       setLoading(true);
-      const response = getEmployees();
+      const response = await getEmployees();
       setEmployees(response.data.data.employees || []);
     } catch {
       toast.error("Failed to fetch employees");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreateEmployee = async (employeeData) => {
-    try {
-      const response = await createEmployee(employeeData);
-      setEmployees([...employees, response.data.data.employee]);
-      toast.success("Employee created successfully");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create employee");
-    }
-  };
-
-  const handleUpdateEmployee = async (employeeData) => {
-    try {
-      const response = await updateEmployee(editingEmployee._id, employeeData);
-      setEmployees(employees.map(e => e._id === editingEmployee._id ? response.data.data.employee : e));
-      toast.success("Employee updated successfully");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update employee");
     }
   };
 
@@ -61,12 +41,12 @@ const Employees = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 p-8 transition-colors duration-200">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Employees</h1>
-            <p className="text-gray-400">Manage company members</p>
+            <h1 className="text-3xl font-bold">Employees</h1>
+            <p className="text-gray-600 dark:text-gray-400">Manage company members</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -76,24 +56,24 @@ const Employees = () => {
           </button>
         </div>
 
-        <div className="bg-black border border-gray-700 rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-700">
-                <th className="text-left p-4 font-semibold text-white">Code</th>
-                <th className="text-left p-4 font-semibold text-white">Name</th>
-                <th className="text-left p-4 font-semibold text-white">Birthday</th>
-                <th className="text-left p-4 font-semibold text-white">Join Date</th>
-                <th className="text-left p-4 font-semibold text-white">Actions</th>
+              <tr className="border-b border-gray-300 dark:border-gray-700">
+                <th className="text-left p-4 font-semibold">Code</th>
+                <th className="text-left p-4 font-semibold">Name</th>
+                <th className="text-left p-4 font-semibold">Birthday</th>
+                <th className="text-left p-4 font-semibold">Join Date</th>
+                <th className="text-left p-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {employees.map((employee) => (
-                <tr key={employee._id} className="border-b border-gray-700 hover:bg-gray-900 transition-colors">
-                  <td className="p-4 font-mono text-blue-400">{employee.employeeCode}</td>
-                  <td className="p-4 font-medium text-white">{employee.name}</td>
-                  <td className="p-4 text-gray-400">{formatDate(employee.birthday)}</td>
-                  <td className="p-4 text-gray-400">{formatDate(employee.joinDate)}</td>
+                <tr key={employee._id} className="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <td className="p-4 font-mono text-blue-600 dark:text-blue-400">{employee.employeeCode}</td>
+                  <td className="p-4 font-medium">{employee.name}</td>
+                  <td className="p-4 text-gray-600 dark:text-gray-400">{formatDate(employee.birthday)}</td>
+                  <td className="p-4 text-gray-600 dark:text-gray-400">{formatDate(employee.joinDate)}</td>
                   <td className="p-4">
                     <button
                       onClick={() => setEditingEmployee(employee)}
@@ -112,15 +92,16 @@ const Employees = () => {
         </div>
       </div>
 
-      <EmployeeModal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setEditingEmployee(null);
-        }}
-        onSave={editingEmployee ? handleUpdateEmployee : handleCreateEmployee}
-        employee={editingEmployee}
-      />
+      {(showModal || editingEmployee) && (
+        <EmployeeModal
+          employee={editingEmployee}
+          onClose={() => {
+            setShowModal(false);
+            setEditingEmployee(null);
+            fetchEmployees();
+          }}
+        />
+      )}
     </div>
   );
 };

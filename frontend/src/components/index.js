@@ -7,6 +7,8 @@ import OnlineUsers from "./OnlineUsers";
 import TaskAssignment from "./TaskAssignment";
 import ProjectTasks from "./ProjectTasks";
 import ProjectDashboard from "./ProjectDashboard";
+import ThemeWrapper from "./ThemeWrapper";
+import ThemeToggle from "./ThemeToggle";
 
 export {
   Header,
@@ -18,4 +20,6 @@ export {
   TaskAssignment,
   ProjectTasks,
   ProjectDashboard,
+  ThemeWrapper,
+  ThemeToggle,
 };

@@ -4,8 +4,37 @@
 
 :root {
   font-family: "Inter", sans-serif;
-  background-color: black;
-  color: white;
+  color-scheme: light dark;
+  background-color: #ffffff;
+  color: #1f2937;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+html.dark {
+  background-color: #0f172a;
+  color: #f9fafb;
+}
+
+/* Fallback for data-theme attribute */
+html[data-theme="dark"] {
+  background-color: #0f172a;
+  color: #f9fafb;
+}
+
+body {
+  background-color: inherit;
+  color: inherit;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #f9fafb;
+}
+
+html[data-theme="dark"] body {
+  background-color: #0f172a;
+  color: #f9fafb;
 }
 
 /* Custom Scrollbar Styles */
@@ -21,41 +50,51 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6b7280;
+  background: #d1d5db;
   border-radius: 3px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: #9ca3af;
 }
 
 ::-webkit-scrollbar-corner {
   background: transparent;
 }
 
+/* Dark theme scrollbar */
+html.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
 /* Firefox */
 * {
   scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+
+html.dark * {
   scrollbar-color: #6b7280 transparent;
 }
 
-/* For dark theme compatibility */
-@media (prefers-color-scheme: dark) {
-  ::-webkit-scrollbar-thumb {
-    background: #9ca3af;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #d1d5db;
-  }
-
-  * {
-    scrollbar-color: #9ca3af transparent;
-  }
+html[data-theme="dark"] * {
+  scrollbar-color: #6b7280 transparent;
 }
 
-/* Specific scrollable containers - you can add these classes to specific elements */
+/* Specific scrollable containers */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #6b7280 transparent;

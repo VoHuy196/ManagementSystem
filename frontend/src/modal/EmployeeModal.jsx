@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { createEmployee, updateEmployee } from "../services/employeeApi.js";
 import toast from "react-hot-toast";
+import { DatePicker } from "antd";
+import dayjs from "dayjs";
 
 const EmployeeModal = ({ employee, onClose }) => {
   const [form, setForm] = useState({
     employeeCode: "",
     name: "",
-    birthday: "",
-    joinDate: "",
+    birthday: null,
+    joinDate: null,
   });
 
   useEffect(() => {
@@ -15,15 +17,15 @@ const EmployeeModal = ({ employee, onClose }) => {
       setForm({
         employeeCode: employee.employeeCode || "",
         name: employee.name || "",
-        birthday: employee.birthday ? new Date(employee.birthday).toISOString().split('T')[0] : "",
-        joinDate: employee.joinDate ? new Date(employee.joinDate).toISOString().split('T')[0] : "",
+        birthday: employee.birthday ? dayjs(employee.birthday) : null,
+        joinDate: employee.joinDate ? dayjs(employee.joinDate) : null,
       });
     } else {
       setForm({
         employeeCode: "",
         name: "",
-        birthday: "",
-        joinDate: "",
+        birthday: null,
+        joinDate: null,
       });
     }
   }, [employee]);
@@ -31,26 +33,36 @@ const EmployeeModal = ({ employee, onClose }) => {
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSave = async () => {
-    if (!form.employeeCode.trim() || !form.name.trim() || !form.joinDate) {
-      toast.error("Employee code, name, and join date are required");
-      return;
-    }
-
-    try {
-      if (employee?._id) {
-        await updateEmployee(employee._id, form);
-        toast.success("Employee updated successfully");
-      } else {
-        await createEmployee(form);
-        toast.success("Employee created successfully");
-      }
-      onClose();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to save employee");
-    }
+  const handleDateChange = (fieldName, date) => {
+    setForm({ ...form, [fieldName]: date });
   };
 
+  const handleSave = async () => {
+  if (!form.employeeCode.trim() || !form.name.trim() || !form.joinDate) {
+    toast.error("Employee code, name, and join date are required");
+    return;
+  }
+
+  const payload = {
+    ...form,
+    birthday: form.birthday ? form.birthday.toDate() : null,
+    joinDate: form.joinDate ? form.joinDate.toDate() : null,
+  };
+
+  try {
+    if (employee?._id) {
+      await updateEmployee(employee._id, payload);
+      toast.success("Employee updated successfully");
+    } else {
+      await createEmployee(payload);
+      toast.success("Employee created successfully");
+    }
+    onClose();
+  } catch (err) {
+    console.log(err.response?.data);
+    toast.error(err.response?.data?.message || "Failed to save employee");
+  }
+};
   const isEditing = employee?._id;
 
   return (
@@ -73,7 +85,7 @@ const EmployeeModal = ({ employee, onClose }) => {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Employee Code *
               </label>
               <input
@@ -87,7 +99,7 @@ const EmployeeModal = ({ employee, onClose }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Name *
               </label>
               <input
@@ -102,27 +114,27 @@ const EmployeeModal = ({ employee, onClose }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1 ">
                   Birthday
                 </label>
-                <input
-                  name="birthday"
-                  type="date"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
+                <DatePicker
                   value={form.birthday}
-                  onChange={handleChange}
+                  onChange={(date) => handleDateChange("birthday", date)}
+                  format="DD/MM/YYYY"
+                  className="w-full"
+                  placeholder="Select birthday"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Join Date *
                 </label>
-                <input
-                  name="joinDate"
-                  type="date"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
+                <DatePicker
                   value={form.joinDate}
-                  onChange={handleChange}
+                  onChange={(date) => handleDateChange("joinDate", date)}
+                  format="DD/MM/YYYY"
+                  className="w-full"
+                  placeholder="Select join date"
                 />
               </div>
             </div>

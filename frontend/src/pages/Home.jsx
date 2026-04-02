@@ -6,14 +6,14 @@ const Home = () => {
   const { user } = useAuth();
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
       {/* Hero Section */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
             Project Management System
           </h1>
-          <p className="text-xl sm:text-2xl text-gray-400 mb-8 leading-relaxed">
+          <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
             A modern, real-time collaborative project management system built
             with the MERN stack. Teams can manage projects and tasks together
             with live updates, drag & drop functionality, and comprehensive
@@ -32,7 +32,7 @@ const Home = () => {
                 </Link>
                 <Link
                   to="/actionlog"
-                  className="border border-gray-600 text-gray-300 px-8 py-3 rounded hover:text-blue-400 hover:border-blue-400 transition-all text-lg font-medium"
+                  className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-3 rounded hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 transition-all text-lg font-medium"
                 >
                   View Activity Logs
                 </Link>
@@ -47,7 +47,7 @@ const Home = () => {
                 </Link>
                 <Link
                   to="/login"
-                  className="border border-gray-600 text-gray-300 px-8 py-3 rounded hover:text-blue-400 hover:border-blue-400 transition-all text-lg font-medium"
+                  className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-8 py-3 rounded hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 transition-all text-lg font-medium"
                 >
                   Sign In
                 </Link>
@@ -56,8 +56,8 @@ const Home = () => {
           </div>
 
           {/* Live Demo Badge */}
-          <div className="inline-flex items-center px-4 py-2 border border-green-600 rounded-full text-green-400 text-sm font-medium mb-12">
-            <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+          <div className="inline-flex items-center px-4 py-2 border border-green-600 rounded-full text-green-600 dark:text-green-400 text-sm font-medium mb-12">
+            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full mr-2 animate-pulse"></div>
             Live Demo Available
           </div>
         </div>
@@ -65,7 +65,7 @@ const Home = () => {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
           {/* Real-time Collaboration */}
-          <div className="border border-gray-700 rounded-lg p-6 hover:border-blue-400 transition-all">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-400 transition-all bg-gray-50 dark:bg-gray-900">
             <div className="w-12 h-12 border border-blue-400 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-blue-400"
@@ -81,17 +81,17 @@ const Home = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Real-time Collaboration
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Live task updates across all connected users via Socket.io. See
               changes instantly as your team works together.
             </p>
           </div>
 
           {/* Drag & Drop Interface */}
-          <div className="border border-gray-700 rounded-lg p-6 hover:border-blue-400 transition-all">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-400 transition-all bg-gray-50 dark:bg-gray-900">
             <div className="w-12 h-12 border border-green-400 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-green-400"
@@ -107,17 +107,17 @@ const Home = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Drag & Drop Interface
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Intuitive drag and drop functionality to move tasks between Todo,
               In Progress, and Done columns with visual feedback.
             </p>
           </div>
 
           {/* Smart Assignment */}
-          <div className="border border-gray-700 rounded-lg p-6 hover:border-blue-400 transition-all">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-400 transition-all bg-gray-50 dark:bg-gray-900">
             <div className="w-12 h-12 border border-purple-400 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-purple-400"
@@ -133,17 +133,17 @@ const Home = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Smart Assignment
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Automatically assigns tasks to team members with the least
               workload using intelligent balancing algorithms.
             </p>
           </div>
 
           {/* Activity Tracking */}
-          <div className="border border-gray-700 rounded-lg p-6 hover:border-blue-400 transition-all">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-400 transition-all bg-gray-50 dark:bg-gray-900">
             <div className="w-12 h-12 border border-yellow-400 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-yellow-400"
@@ -159,17 +159,17 @@ const Home = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Activity Tracking
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Comprehensive audit trail of all task activities with real-time
               updates and user identification.
             </p>
           </div>
 
           {/* Priority Management */}
-          <div className="border border-gray-700 rounded-lg p-6 hover:border-blue-400 transition-all">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-400 transition-all bg-gray-50 dark:bg-gray-900">
             <div className="w-12 h-12 border border-red-400 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-red-400"
@@ -185,17 +185,17 @@ const Home = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Priority Management
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Set High, Medium, and Low priority tasks with visual color coding
               for better task organization.
             </p>
           </div>
 
           {/* Responsive Design */}
-          <div className="border border-gray-700 rounded-lg p-6 hover:border-blue-400 transition-all">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-400 transition-all bg-gray-50 dark:bg-gray-900">
             <div className="w-12 h-12 border border-cyan-400 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-cyan-400"
@@ -211,10 +211,10 @@ const Home = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold mb-2">
               Responsive Design
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
               Mobile-first design that works seamlessly on all devices with
               touch support for drag & drop.
             </p>
@@ -223,42 +223,42 @@ const Home = () => {
 
         {/* Tech Stack */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-white mb-8">
+          <h2 className="text-3xl font-bold mb-8">
             Built with Modern Technology
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="text-4xl mb-2">⚛️</div>
-              <p className="text-gray-400 font-medium">React 18</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">React 18</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-2">🟢</div>
-              <p className="text-gray-400 font-medium">Node.js</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Node.js</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-2">🍃</div>
-              <p className="text-gray-400 font-medium">MongoDB</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">MongoDB</p>
             </div>
             <div className="text-center">
               <div className="text-4xl mb-2">⚡</div>
-              <p className="text-gray-400 font-medium">Socket.io</p>
+              <p className="text-gray-600 dark:text-gray-400 font-medium">Socket.io</p>
             </div>
           </div>
         </div>
 
         {/* Key Highlights */}
-        <div className="border border-gray-700 rounded-lg p-8 mb-16">
-          <h2 className="text-2xl font-bold text-white mb-6 text-center">
+        <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-8 mb-16 bg-gray-50 dark:bg-gray-900">
+          <h2 className="text-2xl font-bold mb-6 text-center">
             Why Choose Our Project Management System?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
               <div>
-                <h4 className="text-white font-medium mb-1">
+                <h4 className="font-medium mb-1">
                   Real-time Synchronization
                 </h4>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   All connected clients receive instant updates with optimistic
                   UI responses
                 </p>
@@ -267,8 +267,8 @@ const Home = () => {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
               <div>
-                <h4 className="text-white font-medium mb-1">Visual Feedback</h4>
-                <p className="text-gray-400 text-sm">
+                <h4 className="font-medium mb-1">Visual Feedback</h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Drag states, hover effects, and drop zone highlighting for
                   better UX
                 </p>
@@ -277,10 +277,10 @@ const Home = () => {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
               <div>
-                <h4 className="text-white font-medium mb-1">
+                <h4 className="font-medium mb-1">
                   Conflict Resolution
                 </h4>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Smart handling of concurrent edits with user confirmation
                   dialogs
                 </p>
@@ -289,10 +289,10 @@ const Home = () => {
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
               <div>
-                <h4 className="text-white font-medium mb-1">
+                <h4 className="font-medium mb-1">
                   User Identification
                 </h4>
-                <p className="text-gray-400 text-sm">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                   Shows "(You)" indicators for current user's tasks and
                   activities
                 </p>

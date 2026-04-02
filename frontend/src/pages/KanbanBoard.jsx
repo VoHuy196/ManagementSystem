@@ -183,31 +183,31 @@ const KanbanBoard = () => {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="text-center">
-          <div className="text-lg text-white">Loading tasks...</div>
+          <div className="text-lg text-gray-900 dark:text-gray-100">Loading tasks...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Task Board</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-2xl font-semibold">Task Board</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Total: {safeTasks.length} tasks • Drag to move between columns
           </p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowTaskAssignment(true)}
-            className="border border-gray-600 text-gray-300 px-4 py-2 rounded hover:text-blue-400 hover:border-blue-400 transition-all"
+            className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 transition-all"
           >
             📋 Assign to Project
           </button>
           <button
             onClick={() => setSelectedTask({})}
-            className="border border-gray-600 text-gray-300 px-4 py-2 rounded hover:text-blue-400 hover:border-blue-400 transition-all"
+            className="border border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-600 dark:hover:border-blue-400 transition-all"
           >
             + Add Task
           </button>
@@ -226,21 +226,21 @@ const KanbanBoard = () => {
               key={status}
               className={`border rounded-lg p-4 shadow-md transition-all ${
                 isDragOver
-                  ? "border-blue-400 bg-gray-800 ring-2 ring-blue-400 ring-opacity-50"
-                  : "bg-black border-gray-700"
+                  ? "border-blue-400 bg-blue-50 dark:bg-gray-800 ring-2 ring-blue-400 ring-opacity-50"
+                  : "bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
               }`}
               onDragOver={handleDragOver}
               onDragEnter={(e) => handleDragEnter(e, status)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, status)}
             >
-              <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-700">
-                <h3 className="text-lg font-semibold text-white">
+              <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-300 dark:border-gray-700">
+                <h3 className="text-lg font-semibold">
                   {status === "In Progress"
                     ? "In Progress"
                     : status.charAt(0).toUpperCase() + status.slice(1)}
                 </h3>
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium border bg-white text-black">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
                   {taskCount}
                 </span>
               </div>

@@ -15,7 +15,7 @@ const Projects = () => {
   const [showProjectModal, setShowProjectModal] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="bg-white dark:bg-gray-950 transition-colors duration-200">
       <div className="container mx-auto px-4 py-8">
         {/* Dashboard Section */}
         <div className="mb-8">

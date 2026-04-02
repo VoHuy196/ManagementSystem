@@ -157,7 +157,7 @@ const ActionLog = () => {
           <span>
             <span
               className={`font-medium ${
-                isCurrentUserAction ? "text-green-400" : "text-white"
+                isCurrentUserAction ? "text-green-400" : "text-gray-900 dark:text-gray-100"
               }`}
             >
               {userName}
@@ -168,7 +168,7 @@ const ActionLog = () => {
                 "{taskTitle}"
               </span>
             ) : (
-              <span className="font-medium text-gray-400">(Task deleted)</span>
+              <span className="font-medium text-gray-600 dark:text-gray-400">(Task deleted)</span>
             )}
           </span>
         );
@@ -177,7 +177,7 @@ const ActionLog = () => {
           <span>
             <span
               className={`font-medium ${
-                isCurrentUserAction ? "text-blue-400" : "text-white"
+                isCurrentUserAction ? "text-blue-400" : "text-gray-900 dark:text-gray-100"
               }`}
             >
               {userName}
@@ -188,7 +188,7 @@ const ActionLog = () => {
                 "{taskTitle}"
               </span>
             ) : (
-              <span className="font-medium text-gray-400">(Task deleted)</span>
+              <span className="font-medium text-gray-600 dark:text-gray-400">(Task deleted)</span>
             )}
           </span>
         );
@@ -197,7 +197,7 @@ const ActionLog = () => {
           <span>
             <span
               className={`font-medium ${
-                isCurrentUserAction ? "text-red-400" : "text-white"
+                isCurrentUserAction ? "text-red-400" : "text-gray-900 dark:text-gray-100"
               }`}
             >
               {userName}
@@ -210,7 +210,7 @@ const ActionLog = () => {
           <span>
             <span
               className={`font-medium ${
-                isCurrentUserAction ? "text-purple-400" : "text-white"
+                isCurrentUserAction ? "text-purple-400" : "text-gray-900 dark:text-gray-100"
               }`}
             >
               {userName}
@@ -231,7 +231,7 @@ const ActionLog = () => {
           <span>
             <span
               className={`font-medium ${
-                isCurrentUserAction ? "text-blue-400" : "text-white"
+                isCurrentUserAction ? "text-blue-400" : "text-gray-900 dark:text-gray-100"
               }`}
             >
               {userName}
@@ -261,7 +261,7 @@ const ActionLog = () => {
       case "Task Status Updated":
         return "text-purple-400 border-purple-400";
       default:
-        return "text-gray-300 border-gray-400";
+        return "text-gray-600 dark:text-gray-400 border-gray-400 dark:border-gray-600";
     }
   };
 
@@ -297,17 +297,17 @@ const ActionLog = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="border border-gray-600 rounded-lg shadow-md">
-          <div className="px-4 py-5 sm:px-6 border-b border-gray-600">
-            <h3 className="text-lg leading-6 font-medium text-white">
+        <div className="border border-gray-300 dark:border-gray-700 rounded-lg shadow-md bg-white dark:bg-gray-900 transition-colors duration-200">
+          <div className="px-4 py-5 sm:px-6 border-b border-gray-300 dark:border-gray-700">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
               Activity Feed
             </h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-300">
+            <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
               Recent activities and changes in your workspace
             </p>
           </div>
           <div className="text-center py-8">
-            <div className="text-sm text-gray-300">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               Loading activity logs...
             </div>
           </div>
@@ -318,22 +318,22 @@ const ActionLog = () => {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div className="border border-gray-600 rounded-lg shadow-md overflow-hidden">
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-600">
+      <div className="border border-gray-300 dark:border-gray-700 rounded-lg shadow-md overflow-hidden bg-white dark:bg-gray-900 transition-colors duration-200">
+        <div className="px-4 py-5 sm:px-6 border-b border-gray-300 dark:border-gray-700">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg leading-6 font-medium text-white">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100">
                 Activity Feed
               </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-300">
+              <p className="mt-1 max-w-2xl text-sm text-gray-600 dark:text-gray-400">
                 Latest activities and changes in your workspace
               </p>
             </div>
             <div className="text-right">
-              <div className="text-sm font-medium text-white">
+              <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                 {logs.length}
               </div>
-              <div className="text-xs text-gray-400">Total Activities</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Total Activities</div>
             </div>
           </div>
         </div>
@@ -341,11 +341,11 @@ const ActionLog = () => {
         <div>
           {logs.length > 0 ? (
             <div className="max-h-96 overflow-y-auto">
-              <ul className="divide-y divide-gray-700">
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {logs.map((log) => (
                   <li
                     key={log._id}
-                    className="px-4 py-4 sm:px-6 hover:bg-gray-800 hover:border-l-4 hover:border-l-blue-400 transition-all"
+                    className="px-4 py-4 sm:px-6 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-l-4 hover:border-l-blue-400 transition-all"
                   >
                     <div className="flex items-start space-x-3">
                       {/* Action Icon */}
@@ -355,10 +355,10 @@ const ActionLog = () => {
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-gray-200">
+                        <div className="text-sm text-gray-700 dark:text-gray-300">
                           {formatActionText(log)}
                         </div>
-                        <div className="mt-1 text-xs text-gray-400">
+                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                           {formatTimestamp(log.createdAt)}
                         </div>
                       </div>
@@ -381,7 +381,7 @@ const ActionLog = () => {
           ) : (
             <div className="text-center py-12">
               <svg
-                className="mx-auto h-12 w-12 text-gray-500"
+                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -393,10 +393,10 @@ const ActionLog = () => {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 712-2h2a2 2 0 712 2"
                 />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-white">
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                 No activity logs
               </h3>
-              <p className="mt-1 text-sm text-gray-400">
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 Activity logs will appear here when actions are performed.
               </p>
             </div>
