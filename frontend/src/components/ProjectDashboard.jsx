@@ -96,9 +96,9 @@ const [activeIndex, setActiveIndex] = useState(null);
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 ">
       {/* Header */}
-      <div className="relative bg-gradient-to-r from-gray-900 via-black to-gray-900 border border-gray-700 rounded-xl p-6 overflow-hidden">
+      <div className="relative bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-6 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-blue-600/10"></div>
         <div className="relative flex justify-between items-center">
           <div>
@@ -110,7 +110,7 @@ const [activeIndex, setActiveIndex] = useState(null);
             </p>
           </div>
           <div className="text-right">
-            <p className="text-gray-300 font-medium">Welcome back,</p>
+            <p className="text-gray-400 font-medium">Welcome back,</p>
             <p className="text-blue-400 font-semibold text-lg">
               {user?.fullName}!
             </p>
@@ -119,10 +119,10 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
 
   {/* Stats Cards */}
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-    <div className="group bg-black border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition-all duration-200 hover:shadow-lg hover:shadow-white/5">
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 ">
+    <div className="group rounded-lg p-4 hover:border-gray-600 transition-all duration-200 hover:shadow-lg hover:shadow-white/5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700">
       <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+        <div className="text-2xl font-bold  text-blue-400 transition-colors">
           {stats.total}
         </div>
         <svg
@@ -139,7 +139,7 @@ const [activeIndex, setActiveIndex] = useState(null);
           />
         </svg>
       </div>
-      <div className="text-sm text-gray-400">Total Projects</div>
+      <div className="text-sm text-gray-400 ">Total Projects</div>
       <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
         <div
           className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
@@ -148,7 +148,7 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
     </div>
 
-    <div className="group bg-black border border-gray-700 rounded-lg p-4 hover:border-green-600 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/10">
+    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-green-600 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/10">
       <div className="flex items-center justify-between mb-2">
         <div className="text-2xl font-bold text-green-400 group-hover:scale-105 transition-transform">
           {stats.active}
@@ -181,7 +181,7 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
     </div>
 
-    <div className="group bg-black border border-gray-700 rounded-lg p-4 hover:border-blue-600 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10">
+    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-blue-600 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10">
       <div className="flex items-center justify-between mb-2">
         <div className="text-2xl font-bold text-blue-400 group-hover:scale-105 transition-transform">
           {stats.completed}
@@ -214,7 +214,7 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
     </div>
 
-    <div className="group bg-black border border-gray-700 rounded-lg p-4 hover:border-gray-500 transition-all duration-200 hover:shadow-lg hover:shadow-gray-500/10">
+    <div className="group  bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-gray-500 transition-all duration-200 hover:shadow-lg hover:shadow-gray-500/10">
       <div className="flex items-center justify-between mb-2">
         <div className="text-2xl font-bold text-gray-400 group-hover:scale-105 transition-transform">
           {stats.archived}
@@ -247,7 +247,7 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
     </div>
 
-    <div className="group bg-black border border-gray-700 rounded-lg p-4 hover:border-purple-600 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/10">
+    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-purple-600 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/10">
       <div className="flex items-center justify-between mb-2">
         <div className="text-2xl font-bold text-purple-400 group-hover:scale-105 transition-transform">
           {stats.owned}
@@ -280,7 +280,7 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
     </div>
 
-    <div className="group bg-black border border-gray-700 rounded-lg p-4 hover:border-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/10">
+    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/10">
       <div className="flex items-center justify-between mb-2">
         <div className="text-2xl font-bold text-yellow-400 group-hover:scale-105 transition-transform">
           {stats.member}
@@ -316,8 +316,8 @@ const [activeIndex, setActiveIndex] = useState(null);
 
   {/* Charts Section */}
   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-    <div className="bg-black border border-gray-700 rounded-xl p-8">
-      <h3 className="text-xl font-semibold text-white mb-6">Project Status Distribution</h3>
+    <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-8">
+      <h3 className="text-xl font-semibold text-grey-400 mb-6">Project Status Distribution</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -345,8 +345,8 @@ const [activeIndex, setActiveIndex] = useState(null);
       </ResponsiveContainer>
     </div>
 
-    <div className="bg-black border border-gray-700 rounded-xl p-8">
-      <h3 className="text-xl font-semibold text-white mb-6">Projects Ownership</h3>
+    <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-8">
+      <h3 className="text-xl font-semibold text-grey-400 mb-6">Projects Ownership</h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -369,7 +369,7 @@ const [activeIndex, setActiveIndex] = useState(null);
   </div>
 
       {/* Recent Projects */}
-      <div className="bg-black border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-all duration-200">
+      <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-all duration-200">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <svg
@@ -385,7 +385,7 @@ const [activeIndex, setActiveIndex] = useState(null);
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-grey-400">
               Recent Projects
             </h2>
           </div>
@@ -420,7 +420,7 @@ const [activeIndex, setActiveIndex] = useState(null);
             {recentProjects.map((project, index) => (
               <div
                 key={project._id}
-                className="group p-4 bg-gray-900/50 border border-gray-700 rounded-lg hover:border-gray-600 hover:bg-gray-900 transition-all duration-200 hover:shadow-lg hover:shadow-white/5"
+                className="group p-4  bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:border-gray-600 hover:bg-gray-900 transition-all duration-200 hover:shadow-lg hover:shadow-white/5"
                 style={{
                   animationDelay: `${index * 100}ms`,
                   animation: "fadeInUp 0.5s ease-out forwards",
@@ -430,7 +430,7 @@ const [activeIndex, setActiveIndex] = useState(null);
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-3 h-3 rounded-full bg-blue-500 group-hover:bg-blue-400 transition-colors"></div>
-                      <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors">
+                      <h3 className="font-semibold text-grey-400 group-hover:text-blue-400 transition-colors">
                         {project.name}
                       </h3>
                       <span
@@ -534,7 +534,7 @@ const [activeIndex, setActiveIndex] = useState(null);
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-black border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-all duration-200">
+      <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-all duration-200">
         <div className="flex items-center gap-3 mb-6">
           <svg
             className="w-6 h-6 text-purple-400"
@@ -549,7 +549,7 @@ const [activeIndex, setActiveIndex] = useState(null);
               d="M13 10V3L4 14h7v7l9-11h-7z"
             />
           </svg>
-          <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-grey-400">Quick Actions</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button className="group flex items-center gap-4 p-5 bg-gradient-to-r from-gray-900 to-gray-800 border border-gray-700 rounded-lg hover:border-blue-600 hover:from-blue-900/20 hover:to-gray-800 transition-all duration-200 text-left hover:shadow-lg hover:shadow-blue-500/10">
