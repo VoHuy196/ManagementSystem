@@ -8,7 +8,7 @@ const ProjectDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-const [activeIndex, setActiveIndex] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(null);
   useEffect(() => {
     fetchProjects();
   }, []);
@@ -118,255 +118,256 @@ const [activeIndex, setActiveIndex] = useState(null);
         </div>
       </div>
 
-  {/* Stats Cards */}
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 ">
-    <div className="group rounded-lg p-4 hover:border-gray-600 transition-all duration-200 hover:shadow-lg hover:shadow-white/5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold  text-blue-400 transition-colors">
-          {stats.total}
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 ">
+        <div className="group rounded-lg p-4 hover:border-gray-600 transition-all duration-200 hover:shadow-lg hover:shadow-white/5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold  text-blue-400 transition-colors">
+              {stats.total}
+            </div>
+            <svg
+              className="w-6 h-6 text-gray-500 group-hover:text-blue-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-400 ">Total Projects</div>
+          <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+            <div
+              className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+              style={{ width: "100%" }}
+            ></div>
+          </div>
         </div>
-        <svg
-          className="w-6 h-6 text-gray-500 group-hover:text-blue-400 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
-      </div>
-      <div className="text-sm text-gray-400 ">Total Projects</div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
-        <div
-          className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
-          style={{ width: "100%" }}
-        ></div>
-      </div>
-    </div>
 
-    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-green-600 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/10">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold text-green-400 group-hover:scale-105 transition-transform">
-          {stats.active}
+        <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-green-600 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold text-green-400 group-hover:scale-105 transition-transform">
+              {stats.active}
+            </div>
+            <svg
+              className="w-6 h-6 text-gray-500 group-hover:text-green-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-400">Active</div>
+          <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+            <div
+              className="bg-green-600 h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width:
+                  stats.total > 0
+                    ? `${(stats.active / stats.total) * 100}%`
+                    : "0%",
+              }}
+            ></div>
+          </div>
         </div>
-        <svg
-          className="w-6 h-6 text-gray-500 group-hover:text-green-400 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          />
-        </svg>
-      </div>
-      <div className="text-sm text-gray-400">Active</div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
-        <div
-          className="bg-green-600 h-1.5 rounded-full transition-all duration-300"
-          style={{
-            width:
-              stats.total > 0
-                ? `${(stats.active / stats.total) * 100}%`
-                : "0%",
-          }}
-        ></div>
-      </div>
-    </div>
 
-    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-blue-600 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold text-blue-400 group-hover:scale-105 transition-transform">
-          {stats.completed}
+        <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-blue-600 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold text-blue-400 group-hover:scale-105 transition-transform">
+              {stats.completed}
+            </div>
+            <svg
+              className="w-6 h-6 text-gray-500 group-hover:text-blue-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-400">Completed</div>
+          <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+            <div
+              className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width:
+                  stats.total > 0
+                    ? `${(stats.completed / stats.total) * 100}%`
+                    : "0%",
+              }}
+            ></div>
+          </div>
         </div>
-        <svg
-          className="w-6 h-6 text-gray-500 group-hover:text-blue-400 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      </div>
-      <div className="text-sm text-gray-400">Completed</div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
-        <div
-          className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
-          style={{
-            width:
-              stats.total > 0
-                ? `${(stats.completed / stats.total) * 100}%`
-                : "0%",
-          }}
-        ></div>
-      </div>
-    </div>
 
-    <div className="group  bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-gray-500 transition-all duration-200 hover:shadow-lg hover:shadow-gray-500/10">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold text-gray-400 group-hover:scale-105 transition-transform">
-          {stats.archived}
+        <div className="group  bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-gray-500 transition-all duration-200 hover:shadow-lg hover:shadow-gray-500/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold text-gray-400 group-hover:scale-105 transition-transform">
+              {stats.archived}
+            </div>
+            <svg
+              className="w-6 h-6 text-gray-500 group-hover:text-gray-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 8l6 6m0 0l6-6m-6 6V2"
+              />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-400">Archived</div>
+          <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+            <div
+              className="bg-gray-600 h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width:
+                  stats.total > 0
+                    ? `${(stats.archived / stats.total) * 100}%`
+                    : "0%",
+              }}
+            ></div>
+          </div>
         </div>
-        <svg
-          className="w-6 h-6 text-gray-500 group-hover:text-gray-400 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 8l6 6m0 0l6-6m-6 6V2"
-          />
-        </svg>
-      </div>
-      <div className="text-sm text-gray-400">Archived</div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
-        <div
-          className="bg-gray-600 h-1.5 rounded-full transition-all duration-300"
-          style={{
-            width:
-              stats.total > 0
-                ? `${(stats.archived / stats.total) * 100}%`
-                : "0%",
-          }}
-        ></div>
-      </div>
-    </div>
 
-    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-purple-600 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/10">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold text-purple-400 group-hover:scale-105 transition-transform">
-          {stats.owned}
+        <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-purple-600 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold text-purple-400 group-hover:scale-105 transition-transform">
+              {stats.owned}
+            </div>
+            <svg
+              className="w-6 h-6 text-gray-500 group-hover:text-purple-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-400">Owned</div>
+          <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+            <div
+              className="bg-purple-600 h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width:
+                  stats.total > 0
+                    ? `${(stats.owned / stats.total) * 100}%`
+                    : "0%",
+              }}
+            ></div>
+          </div>
         </div>
-        <svg
-          className="w-6 h-6 text-gray-500 group-hover:text-purple-400 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-          />
-        </svg>
-      </div>
-      <div className="text-sm text-gray-400">Owned</div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
-        <div
-          className="bg-purple-600 h-1.5 rounded-full transition-all duration-300"
-          style={{
-            width:
-              stats.total > 0
-                ? `${(stats.owned / stats.total) * 100}%`
-                : "0%",
-          }}
-        ></div>
-      </div>
-    </div>
 
-    <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/10">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-2xl font-bold text-yellow-400 group-hover:scale-105 transition-transform">
-          {stats.member}
+        <div className="group bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-4 hover:border-yellow-600 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/10">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-2xl font-bold text-yellow-400 group-hover:scale-105 transition-transform">
+              {stats.member}
+            </div>
+            <svg
+              className="w-6 h-6 text-gray-500 group-hover:text-yellow-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          </div>
+          <div className="text-sm text-gray-400">Member</div>
+          <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
+            <div
+              className="bg-yellow-600 h-1.5 rounded-full transition-all duration-300"
+              style={{
+                width:
+                  stats.total > 0
+                    ? `${(stats.member / stats.total) * 100}%`
+                    : "0%",
+              }}
+            ></div>
+          </div>
         </div>
-        <svg
-          className="w-6 h-6 text-gray-500 group-hover:text-yellow-400 transition-colors"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
       </div>
-      <div className="text-sm text-gray-400">Member</div>
-      <div className="w-full bg-gray-800 rounded-full h-1.5 mt-3">
-        <div
-          className="bg-yellow-600 h-1.5 rounded-full transition-all duration-300"
-          style={{
-            width:
-              stats.total > 0
-                ? `${(stats.member / stats.total) * 100}%`
-                : "0%",
-          }}
-        ></div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+        <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-8">
+          <h3 className="text-xl font-semibold text-grey-400 mb-6">Project Status Distribution</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                nameKey="name"
+                paddingAngle={2}
+                activeIndex={activeIndex}
+                isAnimationActive={false}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
+              // isAnimationActive={false}
+              >
+                {pieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-8">
+          <h3 className="text-xl font-semibold text-grey-400 mb-6">Projects Ownership</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={ownershipData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                dataKey="value"
+                nameKey="name"
+
+              >
+                {ownershipData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-    </div>
-  </div>
-
-  {/* Charts Section */}
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-    <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-8">
-      <h3 className="text-xl font-semibold text-grey-400 mb-6">Project Status Distribution</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={pieData}
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={80}
-            fill="#8884d8"
-            dataKey="value"
-            nameKey="name"
-            paddingAngle={2}
-            activeIndex={activeIndex}
-            onMouseEnter={(_, index) => setActiveIndex(index)}
-            onMouseLeave={() => setActiveIndex(null)}
-            // isAnimationActive={false}
-          >
-            {pieData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-
-    <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-8">
-      <h3 className="text-xl font-semibold text-grey-400 mb-6">Projects Ownership</h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={ownershipData}
-            cx="50%"
-            cy="50%"
-            outerRadius={80}
-            dataKey="value"
-            nameKey="name"
-           
-          >
-            {ownershipData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip /> 
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
-  </div>
 
       {/* Recent Projects */}
       <div className=" bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-all duration-200">
