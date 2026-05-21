@@ -13,10 +13,8 @@ const API = axios.create({
 
 API.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // Browser sẽ tự động gửi httpOnly cookie
+    // Không cần thêm token vào header
 
     if (config.data instanceof FormData) {
       config.headers["Content-Type"] = "multipart/form-data";

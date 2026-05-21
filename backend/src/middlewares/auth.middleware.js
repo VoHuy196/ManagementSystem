@@ -4,8 +4,10 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 
 const authMiddleware = asyncHandler(async (req, res, next) => {
-  const token =
-    req.cookies.token || req.headers.authorization?.replace("Bearer ", "");
+  // Try to get token from cookie or Authorization header
+  const token = 
+    req.cookies?.token || 
+    req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
     throw new ApiError(401, "Not authorized, no token");

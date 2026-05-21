@@ -1,40 +1,14 @@
 import React, { useMemo, useEffect } from 'react';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider } from 'antd';
+import enUS from 'antd/locale/en_US';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en';
 import { useTheme } from '../hooks/useTheme';
 import { THEME_OPTIONS } from '../utils/themeUtils';
+import { getAntdThemeConfig } from '../theme/themeConfig';
 
-/**
- * Ant Design theme configuration
- */
-const getAntdThemeConfig = (isDark) => {
-  return {
-    algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
-    token: {
-      colorPrimary: '#1890ff',
-      borderRadius: 6,
-      colorBgContainer: isDark ? '#141414' : '#ffffff',
-      colorBorder: isDark ? '#434343' : '#d9d9d9',
-    },
-    components: {
-      Button: {
-        controlHeight: 36,
-        borderRadius: 6,
-      },
-      Input: {
-        controlHeight: 36,
-        borderRadius: 6,
-      },
-      Select: {
-        controlHeight: 36,
-        borderRadius: 6,
-      },
-      DatePicker: {
-        controlHeight: 36,
-        borderRadius: 6,
-      },
-    },
-  };
-};
+// Initialize dayjs locale
+dayjs.locale('en');
 
 /**
  * Theme wrapper component for ConfigProvider
@@ -47,22 +21,13 @@ const ThemeWrapper = ({ children }) => {
   useEffect(() => {
     const htmlElement = document.documentElement;
     
-    console.log('ThemeWrapper - isDark:', isDark, 'currentTheme:', currentTheme);
-    
     if (isDark) {
       htmlElement.classList.add('dark');
-      console.log('Added dark class to html');
     } else {
       htmlElement.classList.remove('dark');
-      console.log('Removed dark class from html');
     }
     
-    // Also set data attribute for other uses
     htmlElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-    
-    // Log the current class list
-    console.log('HTML classes:', htmlElement.className);
-    console.log('HTML data-theme:', htmlElement.getAttribute('data-theme'));
   }, [isDark]);
 
   const themeConfig = useMemo(
@@ -71,11 +36,10 @@ const ThemeWrapper = ({ children }) => {
   );
 
   return (
-    <ConfigProvider theme={themeConfig}>
+    <ConfigProvider theme={themeConfig} locale={enUS}>
       {children}
     </ConfigProvider>
   );
 };
 
 export default ThemeWrapper;
-

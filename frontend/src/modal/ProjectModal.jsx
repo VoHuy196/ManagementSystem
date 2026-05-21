@@ -1,254 +1,156 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { Modal, Form, Input, Select, DatePicker, InputNumber, Button, Space, Popconfirm } from "antd";
 import { createProject, updateProject, deleteProject } from "../services/projectApi.js";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import dayjs from "dayjs";
 
-const ProjectModal = ({ project, onClose }) => {
+const { TextArea } = Input;
+
+const ProjectModal = ({ project, open, onClose, onSuccess }) => {
+  const [form] = Form.useForm();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    status: "active",
-    startDate: "",
-    endDate: "",
-    department: "",
-    budget: "",
-  });
+  const isEditing = project && project._id;
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteProject(project._id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
       toast.success("Project deleted successfully");
-      onClose();
+      if (onSuccess) onSuccess();
+      else onClose();
     },
     onError: () => toast.error("Failed to delete project"),
   });
 
   useEffect(() => {
-    if (project && Object.keys(project).length > 0) {
-      setForm({
-        name: project.name || "",
-        description: project.description || "",
-        status: project.status || "active",
-        startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : "",
-        endDate: project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : "",
-        department: project.department || "",
-        budget: project.budget || "",
-      });
-    } else {
-      setForm({
-        name: "",
-        description: "",
-        status: "active",
-        startDate: "",
-        endDate: "",
-        department: "",
-        budget: "",
-      });
+    if (open) {
+      if (isEditing) {
+        form.setFieldsValue({
+          name: project.name,
+          description: project.description,
+          status: project.status || "active",
+          startDate: project.startDate ? dayjs(project.startDate) : null,
+          endDate: project.endDate ? dayjs(project.endDate) : null,
+          department: project.department,
+          budget: project.budget,
+        });
+      } else {
+        form.resetFields();
+      }
     }
-  }, [project]);
+  }, [project, open, form, isEditing]);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSave = async () => {
-    if (!form.name.trim()) {
-      toast.error("Project name is required");
-      return;
-    }
-
-    if (form.budget && parseFloat(form.budget) < 0) {
-      toast.error("Budget cannot be negative");
-      return;
-    }
-
-    const data = { ...form };
-    if (form.budget) data.budget = parseFloat(form.budget);
+  const handleFinish = async (values) => {
+    const data = {
+      ...values,
+      startDate: values.startDate ? values.startDate.toISOString() : null,
+      endDate: values.endDate ? values.endDate.toISOString() : null,
+    };
 
     try {
-      if (project?._id) {
+      if (isEditing) {
         await updateProject(project._id, data);
         toast.success("Project updated successfully");
       } else {
         await createProject(data);
         toast.success("Project created successfully");
       }
-      onClose();
+      
+      queryClient.invalidateQueries({ queryKey: ['projects'], exact: false });
+      if (onSuccess) onSuccess();
+      else onClose();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save project");
     }
   };
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      deleteMutation.mutate();
-    }
-  };
-
-  const isEditing = project?._id;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="border rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold">
-              {isEditing ? "Edit Project" : "Create New Project"}
-            </h3>
-            <button
-              onClick={onClose}
-              className="p-1 text-gray-600 hover:text-blue-600 transition-all"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
+    <Modal
+      title={isEditing ? "Edit Project" : "Create New Project"}
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      destroyOnClose
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+        initialValues={{ status: "active" }}
+      >
+        <Form.Item
+          name="name"
+          label="Project Name"
+          rules={[{ required: true, message: "Please enter project name" }]}
+        >
+          <Input placeholder="Enter project name" />
+        </Form.Item>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name *
-              </label>
-              <input
-                name="name"
-                type="text"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
-                placeholder="Enter project name"
-                value={form.name}
-                onChange={handleChange}
-              />
-            </div>
+        <Form.Item name="description" label="Description">
+          <TextArea rows={3} placeholder="Enter project description" />
+        </Form.Item>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                name="description"
-                rows="3"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all resize-none"
-                placeholder="Enter project description"
-                value={form.description}
-                onChange={handleChange}
-              />
-            </div>
+        <div style={{ display: "flex", gap: "16px" }}>
+          <Form.Item name="status" label="Status" style={{ flex: 1 }}>
+            <Select>
+              <Select.Option value="active">Active</Select.Option>
+              <Select.Option value="completed">Completed</Select.Option>
+              <Select.Option value="archived">Archived</Select.Option>
+            </Select>
+          </Form.Item>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  name="status"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all appearance-none cursor-pointer"
-                  value={form.status}
-                  onChange={handleChange}
-                >
-                  <option value="active">Active</option>
-                  <option value="completed">Completed</option>
-                  <option value="archived">Archived</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Department
-                </label>
-                <input
-                  name="department"
-                  type="text"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
-                  placeholder="Enter department"
-                  value={form.department}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
-                </label>
-                <input
-                  name="startDate"
-                  type="date"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
-                  value={form.startDate}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  End Date
-                </label>
-                <input
-                  name="endDate"
-                  type="date"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
-                  value={form.endDate}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Budget
-              </label>
-              <input
-                name="budget"
-                type="number"
-                min="0"
-                step="0.01"
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-600 transition-all"
-                placeholder="Enter budget"
-                value={form.budget}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
-            <button
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 transition-all font-medium text-white"
-            >
-              {isEditing ? "Update Project" : "Create Project"}
-            </button>
-            {isEditing && (
-              <button
-                onClick={handleDelete}
-                className="flex-1 px-4 py-2 bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-all font-medium text-white"
-              >
-                Delete Project
-              </button>
-            )}
-          </div>
+          <Form.Item name="department" label="Department" style={{ flex: 1 }}>
+            <Input placeholder="Enter department" />
+          </Form.Item>
         </div>
-      </div>
-    </div>
+
+        <div style={{ display: "flex", gap: "16px" }}>
+          <Form.Item name="startDate" label="Start Date" style={{ flex: 1 }}>
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+
+          <Form.Item name="endDate" label="End Date" style={{ flex: 1 }}>
+            <DatePicker style={{ width: "100%" }} />
+          </Form.Item>
+        </div>
+
+        <Form.Item name="budget" label="Budget">
+          <InputNumber
+            style={{ width: "100%" }}
+            min={0}
+            placeholder="Enter budget"
+            formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
+          />
+        </Form.Item>
+
+        <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Space>
+              {isEditing && (
+                <Popconfirm
+                  title="Are you sure you want to delete this project?"
+                  onConfirm={() => deleteMutation.mutate()}
+                  okText="Yes"
+                  cancelText="No"
+                  okButtonProps={{ danger: true, loading: deleteMutation.isLoading }}
+                >
+                  <Button danger>Delete</Button>
+                </Popconfirm>
+              )}
+            </Space>
+            <Space>
+              <Button onClick={onClose}>Cancel</Button>
+              <Button type="primary" htmlType="submit">
+                {isEditing ? "Update Project" : "Create Project"}
+              </Button>
+            </Space>
+          </div>
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 
 export default ProjectModal;
-
