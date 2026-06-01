@@ -14,6 +14,10 @@ import {
   Projects,
   Employees,
   Worklogs,
+  Attendance,
+  LeaveRequest,
+  Performance,
+  Reports,
 } from "../pages";
 import ThemeTest from "../pages/ThemeTest";
 import Layout from "../layout";
@@ -72,6 +76,38 @@ const AppRoutes = createBrowserRouter(
         element={
           <ProtectedRoutes>
             <Worklogs />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/attendance"
+        element={
+          <ProtectedRoutes>
+            <Attendance />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/leaves"
+        element={
+          <ProtectedRoutes>
+            <LeaveRequest />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/performance"
+        element={
+          <ProtectedRoutes>
+            <Performance />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoutes>
+            <Reports />
           </ProtectedRoutes>
         }
       />

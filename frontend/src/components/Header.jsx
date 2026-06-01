@@ -41,6 +41,18 @@ const Header = () => {
             <Link to="/worklogs" className="hover:text-blue-600 dark:hover:text-blue-400 transition-all dark:text-gray-300">
               Worklogs
             </Link>
+            <Link to="/attendance" className="hover:text-blue-600 dark:hover:text-blue-400 transition-all dark:text-gray-300">
+              Attendance
+            </Link>
+            <Link to="/leaves" className="hover:text-blue-600 dark:hover:text-blue-400 transition-all dark:text-gray-300">
+              Leaves
+            </Link>
+            <Link to="/performance" className="hover:text-blue-600 dark:hover:text-blue-400 transition-all dark:text-gray-300">
+              Performance
+            </Link>
+            <Link to="/reports" className="hover:text-blue-600 dark:hover:text-blue-400 transition-all dark:text-gray-300">
+              Reports
+            </Link>
             <Link
               to="/actionlog"
               className="hover:text-blue-600 dark:hover:text-blue-400 transition-all dark:text-gray-300"
@@ -153,6 +165,34 @@ const Header = () => {
                     Worklogs
                   </Link>
                   <Link
+                    to="/attendance"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Attendance
+                  </Link>
+                  <Link
+                    to="/leaves"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Leaves
+                  </Link>
+                  <Link
+                    to="/performance"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Performance
+                  </Link>
+                  <Link
+                    to="/reports"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Reports
+                  </Link>
+                  <Link
                     to="/actionlog"
                     className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
                     onClick={() => setIsMenuOpen(false)}
@@ -197,6 +237,34 @@ const Header = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Worklogs
+                  </Link>
+                  <Link
+                    to="/attendance"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Attendance
+                  </Link>
+                  <Link
+                    to="/leaves"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Leaves
+                  </Link>
+                  <Link
+                    to="/performance"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Performance
+                  </Link>
+                  <Link
+                    to="/reports"
+                    className="block px-3 py-2 rounded hover:text-blue-600 dark:hover:text-blue-400 dark:text-gray-300 transition-all"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Reports
                   </Link>
                   <Link
                     to="/actionlog"

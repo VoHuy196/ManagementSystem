@@ -7,5 +7,23 @@ import Logout from "./Logout.jsx";
 import Projects from "./Projects";
 import Employees from "./Employees.jsx";
 import Worklogs from "./Worklogs.jsx";
+import Attendance from "./Attendance.jsx";
+import LeaveRequest from "./LeaveRequest.jsx";
+import Performance from "./Performance.jsx";
+import Reports from "./Reports.jsx";
 
-export { Home, Register, Login, KanbanBoard, ActionLog, Logout, Projects, Employees, Worklogs };
+export { 
+  Home, 
+  Register, 
+  Login, 
+  KanbanBoard, 
+  ActionLog, 
+  Logout, 
+  Projects, 
+  Employees, 
+  Worklogs,
+  Attendance,
+  LeaveRequest,
+  Performance,
+  Reports
+};

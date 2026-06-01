@@ -37,6 +37,10 @@ import taskRoutes from "./routes/task.route.js";
 import projectRoutes from "./routes/projects.route.js";
 import employeeRoutes from "./routes/employees.route.js";
 import worklogRoutes from "./routes/worklog.route.js";
+import attendanceRoutes from "./routes/attendance.route.js";
+import leaveRequestRoutes from "./routes/leaveRequest.route.js";
+import performanceRoutes from "./routes/performance.route.js";
+import statsRoutes from "./routes/stats.route.js";
 
 // implement routing
 app.use("/api/auth", authRoutes);
@@ -45,6 +49,10 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/worklogs", worklogRoutes);
+app.use("/api/attendance", attendanceRoutes);
+app.use("/api/leaves", leaveRequestRoutes);
+app.use("/api/performance", performanceRoutes);
+app.use("/api/stats", statsRoutes);
 
 app.use(errorHandler);
 
