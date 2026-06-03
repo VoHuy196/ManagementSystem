@@ -28,10 +28,11 @@ const Reports = () => {
         statsApi.getProjects()
       ]);
 
-      if (overviewRes.success) setOverview(overviewRes.data);
+      // res.data = HTTP body từ ApiResponse: { statusCode, data, success, message }
+      if (overviewRes.data.success) setOverview(overviewRes.data.data);
       
-      if (attendanceRes.success) {
-        const { present, absent, leaves } = attendanceRes.data;
+      if (attendanceRes.data.success) {
+        const { present, absent, leaves } = attendanceRes.data.data;
         setAttendance([
           { name: "Present", value: present, color: "#52c41a" },
           { name: "Absent", value: absent, color: "#f5222d" },
@@ -39,7 +40,7 @@ const Reports = () => {
         ]);
       }
 
-      if (projectsRes.success) setProjects(projectsRes.data);
+      if (projectsRes.data.success) setProjects(projectsRes.data.data);
     } catch (error) {
       message.error("Failed to fetch report data");
     } finally {

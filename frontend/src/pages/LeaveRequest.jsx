@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Table, Tag, Space, Typography, message, Form, Input, DatePicker, Select, Modal, Tabs } from "antd";
 import { PlusOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { leaveApi } from "../services/leaveApi";
+import { getMyEmployee } from "../services/employeeApi";
 import { useAuth } from "../context/AuthContext";
 import dayjs from "dayjs";
 
@@ -15,12 +16,14 @@ const LeaveRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const { user } = useAuth();
-  const isAdminOrManager = user?.role === "Admin" || user?.role === "Manager";
+  const userRole = user?.data?.user?.role || user?.role;
+  const isAdminOrManager = userRole === "Admin" || userRole === "Manager";
 
   const fetchMyRequests = async () => {
     try {
       const res = await leaveApi.getMyRequests();
-      if (res.success) setMyRequests(res.data);
+      // res.data = HTTP body: { statusCode, data: [...], success, message }
+      if (res.data.success) setMyRequests(res.data.data);
     } catch (error) {
       message.error("Failed to fetch your requests");
     }
@@ -30,13 +33,15 @@ const LeaveRequest = () => {
     if (!isAdminOrManager) return;
     try {
       const res = await leaveApi.getAllRequests();
-      if (res.success) setAllRequests(res.data);
+      if (res.data.success) setAllRequests(res.data.data);
     } catch (error) {
       message.error("Failed to fetch all requests");
     }
   };
 
   useEffect(() => {
+    // Ensure employee profile exists trước khi fetch leave data
+    getMyEmployee().catch(() => {});
     fetchMyRequests();
     if (isAdminOrManager) fetchAllRequests();
   }, [isAdminOrManager]);
@@ -51,7 +56,7 @@ const LeaveRequest = () => {
         reason: values.reason,
       };
       const res = await leaveApi.createRequest(payload);
-      if (res.success) {
+      if (res.data.success) {
         message.success("Leave request submitted!");
         setIsModalOpen(false);
         form.resetFields();
@@ -67,7 +72,7 @@ const LeaveRequest = () => {
   const handleUpdateStatus = async (id, status) => {
     try {
       const res = await leaveApi.updateStatus(id, status);
-      if (res.success) {
+      if (res.data.success) {
         message.success(`Request ${status.toLowerCase()} successfully`);
         fetchAllRequests();
       }

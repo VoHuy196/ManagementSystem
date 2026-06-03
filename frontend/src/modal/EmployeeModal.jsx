@@ -1,12 +1,38 @@
-import React, { useEffect } from "react";
-import { Modal, Form, Input, DatePicker, Button, Space } from "antd";
+import React, { useEffect, useState } from "react";
+import { Modal, Form, Input, DatePicker, Button, Space, Select } from "antd";
 import { createEmployee, updateEmployee } from "../services/employeeApi.js";
+import API from "../services/apiHandler.js";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
 
 const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
   const [form] = Form.useForm();
+  const [users, setUsers] = useState([]);
   const isEditing = employee && employee._id;
+
+  // Lấy danh sách Users để Admin có thể link với Employee profile
+  useEffect(() => {
+    if (open) {
+      Promise.all([
+        API.get("/auth/users"),
+        API.get("/employees")
+      ])
+        .then(([usersRes, employeesRes]) => {
+          const allUsers = usersRes.data?.data?.users || [];
+          const employees = employeesRes.data?.data?.employees || [];
+          const linkedUserIds = new Set(
+            employees.filter((e) => e.user).map((e) => e.user?._id || e.user)
+          );
+          // Cho phép chọn các user chưa được gán cho nhân viên nào, hoặc user hiện tại của employee này
+          const currentUserId = employee?.user?._id || employee?.user;
+          const unlinkedUsers = allUsers.filter(
+            (u) => !linkedUserIds.has(u._id) || u._id === currentUserId
+          );
+          setUsers(unlinkedUsers);
+        })
+        .catch(() => {});
+    }
+  }, [open, employee]);
 
   useEffect(() => {
     if (open) {
@@ -16,6 +42,7 @@ const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
           name: employee.name,
           birthday: employee.birthday ? dayjs(employee.birthday) : null,
           joinDate: employee.joinDate ? dayjs(employee.joinDate) : null,
+          user: employee.user?._id || employee.user || undefined,
         });
       } else {
         form.resetFields();
@@ -92,6 +119,23 @@ const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
             <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" placeholder="Select join date" />
           </Form.Item>
         </div>
+
+        <Form.Item
+          name="user"
+          label="Link User Account"
+          tooltip="Link this employee profile to a User account to enable Attendance, Leave, and Performance features"
+        >
+          <Select
+            placeholder="Select a user account (optional)"
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            options={users.map((u) => ({
+              value: u._id,
+              label: `${u.fullName} ${u.email ? `(${u.email})` : ""}`,
+            }))}
+          />
+        </Form.Item>
 
         <Form.Item style={{ marginBottom: 0, marginTop: 24, textAlign: "right" }}>
           <Space>

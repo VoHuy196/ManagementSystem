@@ -10,10 +10,7 @@ const getTasks = asyncHandler(async (req, res) => {
     .populate("assignedTo", "fullName")
     .populate("createdBy", "fullName");
 
-  if (!tasks || tasks.length === 0) {
-    throw new ApiError(404, "No tasks found");
-  }
-
+  // Trả về array rỗng nếu không có task, không nên throw 404
   res
     .status(200)
     .json(new ApiResponse(200, { tasks }, "Tasks fetched successfully"));
@@ -314,6 +311,8 @@ const deleteTask = asyncHandler(async (req, res) => {
 
 const assignTask = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // Admin có thể truyền userId cụ thể qua body, nếu không thì dùng smart assign
+  const { userId } = req.body;
 
   if (!id) {
     throw new ApiError(400, "Task ID is required");
@@ -325,17 +324,24 @@ const assignTask = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Task not found");
   }
 
-  if (task.assignedTo) {
-    throw new ApiError(400, "Task is already assigned to a user");
+  // Bỏ kiểm tra "already assigned" — Admin/Manager có thể re-assign bất kỳ lúc nào
+  let assignedUser;
+  if (userId) {
+    // Manual assignment: Admin chỉ định cụ thể
+    const { User } = await import("../models/users.model.js");
+    assignedUser = await User.findById(userId);
+    if (!assignedUser) {
+      throw new ApiError(404, "User not found");
+    }
+  } else {
+    // Smart assign: chọn user có ít task nhất
+    assignedUser = await smartAssign();
+    if (!assignedUser) {
+      throw new ApiError(500, "No users available for task assignment");
+    }
   }
 
-  const user = await smartAssign();
-
-  if (!user) {
-    throw new ApiError(500, "No users available for task assignment");
-  }
-
-  task.assignedTo = user._id;
+  task.assignedTo = assignedUser._id;
 
   const updatedTask = await task.save();
 
@@ -353,16 +359,21 @@ const assignTask = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to create action log for task assignment");
   }
 
+  // Populate for response
+  const populatedTask = await Task.findById(updatedTask._id)
+    .populate("assignedTo", "fullName")
+    .populate("createdBy", "fullName");
+
   // Emit socket event for real-time update
   const io = req.app.get('io');
   if (io) {
-    io.emit('taskAssigned', { task: updatedTask });
+    io.emit('taskAssigned', { task: populatedTask });
   }
 
   res
     .status(200)
     .json(
-      new ApiResponse(200, { task: updatedTask }, "Task assigned successfully")
+      new ApiResponse(200, { task: populatedTask }, `Task assigned to ${assignedUser.fullName} successfully`)
     );
 });
 

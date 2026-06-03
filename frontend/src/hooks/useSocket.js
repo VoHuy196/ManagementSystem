@@ -1,13 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { io } from "socket.io-client";
+import socket from "../services/socketService";
 import toast from "react-hot-toast";
-
-const socket = io(import.meta.env.VITE_WEBSOCKET_URL, {
-  autoConnect: true,
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
-});
 
 const useSocket = (setTasks, currentUser = null) => {
   const [onlineUsers, setOnlineUsers] = useState([]);

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Table, Tag, Space, Typography, message, Row, Col, Statistic } from "antd";
-import { LoginOutlined, LogoutOutlined, HistoryOutlined } from "@ant-design/icons";
+import { Card, Button, Table, Tag, Space, Typography, message, Row, Col, Statistic, Alert } from "antd";
+import { LoginOutlined, LogoutOutlined, HistoryOutlined, UserOutlined } from "@ant-design/icons";
 import { attendanceApi } from "../services/attendanceApi";
+import { getMyEmployee } from "../services/employeeApi";
 import { useAuth } from "../context/AuthContext";
 import dayjs from "dayjs";
 
@@ -11,8 +12,24 @@ const Attendance = () => {
   const [loading, setLoading] = useState(false);
   const [records, setRecords] = useState([]);
   const [todayRecord, setTodayRecord] = useState(null);
+  const [hasProfile, setHasProfile] = useState(true); // track nếu có employee profile
   const { user } = useAuth();
-  const isAdminOrManager = user?.role === "Admin" || user?.role === "Manager";
+  // user object có format: { data: { user: { role, ... } } } hoặc trực tiếp { role, ... }
+  const userRole = user?.data?.user?.role || user?.role;
+  const isAdminOrManager = userRole === "Admin" || userRole === "Manager";
+
+  // Ensure employee profile exists khi mount
+  useEffect(() => {
+    const ensureProfile = async () => {
+      try {
+        await getMyEmployee(); // Backend tự động tạo nếu chưa có
+        setHasProfile(true);
+      } catch (err) {
+        setHasProfile(false);
+      }
+    };
+    ensureProfile();
+  }, []);
 
   const fetchRecords = async () => {
     setLoading(true);
@@ -21,19 +38,21 @@ const Attendance = () => {
         ? await attendanceApi.getAllRecords() 
         : await attendanceApi.getMyRecords();
       
-      if (response.success) {
-        setRecords(response.data);
+      // Axios wraps HTTP body inside response.data
+      // Backend ApiResponse format: { statusCode, data: [...], success, message }
+      const body = response.data;
+      if (body.success) {
+        setRecords(body.data);
         
         // Find today's record for the current user
         const today = dayjs().startOf('day');
-        const found = response.data.find(r => 
-          dayjs(r.date).isSame(today, 'day') && 
-          (isAdminOrManager ? r.employee?.user === user?._id : true)
+        const found = body.data.find(r => 
+          dayjs(r.date).isSame(today, 'day')
         );
         setTodayRecord(found);
       }
     } catch (error) {
-      message.error("Failed to fetch records");
+      message.error(error.response?.data?.message || "Failed to fetch records");
     } finally {
       setLoading(false);
     }
@@ -46,7 +65,7 @@ const Attendance = () => {
   const handleCheckIn = async () => {
     try {
       const res = await attendanceApi.checkIn();
-      if (res.success) {
+      if (res.data.success) {
         message.success("Checked in successfully!");
         fetchRecords();
       }
@@ -58,7 +77,7 @@ const Attendance = () => {
   const handleCheckOut = async () => {
     try {
       const res = await attendanceApi.checkOut();
-      if (res.success) {
+      if (res.data.success) {
         message.success("Checked out successfully!");
         fetchRecords();
       }
@@ -106,6 +125,17 @@ const Attendance = () => {
   return (
     <div className="p-6">
       <Title level={2}>Attendance Management</Title>
+
+      {!hasProfile && (
+        <Alert
+          type="warning"
+          showIcon
+          icon={<UserOutlined />}
+          message="Employee profile not set up"
+          description="Your employee profile could not be found or created. Please contact your administrator."
+          className="mb-4"
+        />
+      )}
       
       <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} md={8}>

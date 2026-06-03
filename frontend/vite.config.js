@@ -17,6 +17,12 @@ export default defineConfig({
         target: "http://localhost:3000",
         changeOrigin: true,
       },
+      // Proxy Socket.IO để tránh ERR_CONNECTION_REFUSED khi chạy local
+      "/socket.io": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        ws: true, // Bật WebSocket proxy
+      },
     },
   },
 });

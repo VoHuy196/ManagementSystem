@@ -1,4 +1,5 @@
 import { User } from "../models/users.model.js";
+import { Employee } from "../models/employees.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
@@ -29,11 +30,22 @@ const userRegister = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Something went wrong while registering user");
   }
 
+  // Tự động tạo Employee profile tương ứng với User mới
+  // Các tính năng Attendance, Leave, Performance đều yêu cầu có Employee profile
+  const employeeCode = "EMP" + Date.now().toString().slice(-6);
+  const employee = await Employee.create({
+    employeeCode,
+    name: fullName,
+    joinDate: new Date(),
+    user: user._id,
+  });
+
   res.status(201).json(
     new ApiResponse(
       201,
       {
         user: createdUser,
+        employee,
       },
       "User registered successfully"
     )
@@ -69,6 +81,18 @@ const userLogin = asyncHandler(async (req, res) => {
 
   if (!loggedInUser) {
     throw new ApiError(500, "Something went wrong while logging in user");
+  }
+
+  // Nếu user chưa có Employee profile (user cũ tạo trước khi có tính năng này), tự động tạo
+  let employee = await Employee.findOne({ user: user._id });
+  if (!employee) {
+    const employeeCode = "EMP" + Date.now().toString().slice(-6);
+    employee = await Employee.create({
+      employeeCode,
+      name: loggedInUser.fullName,
+      joinDate: new Date(),
+      user: user._id,
+    });
   }
 
   res

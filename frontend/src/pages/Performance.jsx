@@ -3,6 +3,7 @@ import { Card, Table, Typography, Row, Col, List, Avatar, Tag, Statistic } from 
 import { TrophyOutlined, LineChartOutlined, StarOutlined } from "@ant-design/icons";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { performanceApi } from "../services/performanceApi";
+import { getMyEmployee } from "../services/employeeApi";
 import { useAuth } from "../context/AuthContext";
 
 const { Title } = Typography;
@@ -21,8 +22,9 @@ const Performance = () => {
         performanceApi.getMyStats()
       ]);
       
-      if (rankingRes.success) setRanking(rankingRes.data);
-      if (statsRes.success) setMyStats(statsRes.data);
+      // res.data = HTTP body từ ApiResponse: { statusCode, data, success, message }
+      if (rankingRes.data.success) setRanking(rankingRes.data.data);
+      if (statsRes.data.success) setMyStats(statsRes.data.data);
     } catch (error) {
       console.error("Failed to fetch performance data");
     } finally {
@@ -31,6 +33,8 @@ const Performance = () => {
   };
 
   useEffect(() => {
+    // Ensure employee profile exists trước khi fetch performance data
+    getMyEmployee().catch(() => {});
     fetchData();
   }, []);
 

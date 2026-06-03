@@ -1,4 +1,5 @@
 import { Employee } from "../models/employees.model.js";
+import { User } from "../models/users.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
@@ -96,10 +97,32 @@ const deleteEmployee = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, {}, "Employee deleted successfully"));
 });
 
+const getMyEmployee = asyncHandler(async (req, res) => {
+  let employee = await Employee.findOne({ user: req.user._id })
+    .populate("user", "fullName email role");
+
+  // Tự động tạo nếu chưa có (fallback cho user cũ)
+  if (!employee) {
+    const employeeCode = "EMP" + Date.now().toString().slice(-6);
+    employee = await Employee.create({
+      employeeCode,
+      name: req.user.fullName,
+      joinDate: new Date(),
+      user: req.user._id,
+    });
+    employee = await Employee.findById(employee._id).populate("user", "fullName email role");
+  }
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, { employee }, "Your employee profile fetched successfully"));
+});
+
 export {
   getEmployees,
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  getMyEmployee,
 };
 

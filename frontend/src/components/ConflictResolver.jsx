@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { updateTask } from "../services/taskApi";
-import { io } from "socket.io-client";
+import socket from "../services/socketService";
 import toast from "react-hot-toast";
-
-const socket = io(import.meta.env.VITE_WEBSOCKET_URL);
 
 const ConflictResolver = ({ conflict, onClose }) => {
   const [isResolving, setIsResolving] = useState(false);

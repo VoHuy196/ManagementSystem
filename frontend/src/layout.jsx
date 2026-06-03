@@ -11,6 +11,10 @@ import {
   UserOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
+  ClockCircleOutlined,
+  BarChartOutlined,
+  FileTextOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "./context/AuthContext";
 import ThemeToggle from "./components/ThemeToggle";
@@ -96,8 +100,28 @@ const AppLayout = () => {
     },
     {
       key: "/worklogs",
-      icon: <CalendarOutlined />,
+      icon: <ClockCircleOutlined />,
       label: <Link to="/worklogs">Worklogs</Link>,
+    },
+    {
+      key: "/attendance",
+      icon: <CalendarOutlined />,
+      label: <Link to="/attendance">Attendance</Link>,
+    },
+    {
+      key: "/leaves",
+      icon: <FileTextOutlined />,
+      label: <Link to="/leaves">Leave Requests</Link>,
+    },
+    {
+      key: "/performance",
+      icon: <TrophyOutlined />,
+      label: <Link to="/performance">Performance</Link>,
+    },
+    {
+      key: "/reports",
+      icon: <BarChartOutlined />,
+      label: <Link to="/reports">Reports</Link>,
     },
     {
       key: "/actionlog",
