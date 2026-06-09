@@ -25,6 +25,11 @@ const createLeaveRequest = asyncHandler(async (req, res) => {
     reason,
   });
 
+  const io = req.app.get("io");
+  if (io) {
+    io.emit("leaveRequestCreated", { leaveRequest });
+  }
+
   res
     .status(201)
     .json(new ApiResponse(201, leaveRequest, "Leave request submitted successfully"));
@@ -78,6 +83,11 @@ const updateLeaveStatus = asyncHandler(async (req, res) => {
   leaveRequest.approvedBy = req.user._id;
 
   await leaveRequest.save();
+
+  const io = req.app.get("io");
+  if (io) {
+    io.emit("leaveRequestUpdated", { leaveRequest });
+  }
 
   res
     .status(200)

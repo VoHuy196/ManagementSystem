@@ -5,6 +5,7 @@ import { leaveApi } from "../services/leaveApi";
 import { getMyEmployee } from "../services/employeeApi";
 import { useAuth } from "../context/AuthContext";
 import dayjs from "dayjs";
+import socket from "../services/socketService";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -22,7 +23,6 @@ const LeaveRequest = () => {
   const fetchMyRequests = async () => {
     try {
       const res = await leaveApi.getMyRequests();
-      // res.data = HTTP body: { statusCode, data: [...], success, message }
       if (res.data.success) setMyRequests(res.data.data);
     } catch (error) {
       message.error("Failed to fetch your requests");
@@ -40,10 +40,27 @@ const LeaveRequest = () => {
   };
 
   useEffect(() => {
-    // Ensure employee profile exists trước khi fetch leave data
     getMyEmployee().catch(() => {});
     fetchMyRequests();
     if (isAdminOrManager) fetchAllRequests();
+
+    // Socket listeners for real-time updates
+    const handleLeaveRequestCreated = () => {
+      if (isAdminOrManager) fetchAllRequests();
+    };
+
+    const handleLeaveRequestUpdated = () => {
+      fetchMyRequests();
+      if (isAdminOrManager) fetchAllRequests();
+    };
+
+    socket.on("leaveRequestCreated", handleLeaveRequestCreated);
+    socket.on("leaveRequestUpdated", handleLeaveRequestUpdated);
+
+    return () => {
+      socket.off("leaveRequestCreated", handleLeaveRequestCreated);
+      socket.off("leaveRequestUpdated", handleLeaveRequestUpdated);
+    };
   }, [isAdminOrManager]);
 
   const handleSubmit = async (values) => {
