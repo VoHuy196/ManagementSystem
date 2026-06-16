@@ -41,6 +41,9 @@ import attendanceRoutes from "./routes/attendance.route.js";
 import leaveRequestRoutes from "./routes/leaveRequest.route.js";
 import performanceRoutes from "./routes/performance.route.js";
 import statsRoutes from "./routes/stats.route.js";
+import workShiftRoutes from "./routes/workShift.route.js";
+import workSessionRoutes from "./routes/workSession.route.js";
+import workloadStatsRoutes from "./routes/workloadStats.route.js";
 
 // implement routing
 app.use("/api/auth", authRoutes);
@@ -53,6 +56,9 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRequestRoutes);
 app.use("/api/performance", performanceRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/work-shifts", workShiftRoutes);
+app.use("/api/work-sessions", workSessionRoutes);
+app.use("/api/workload-stats", workloadStatsRoutes);
 
 app.use(errorHandler);
 

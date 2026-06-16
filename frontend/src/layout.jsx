@@ -15,6 +15,8 @@ import {
   BarChartOutlined,
   FileTextOutlined,
   TrophyOutlined,
+  DashboardOutlined,
+  ScheduleOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "./context/AuthContext";
 import ThemeToggle from "./components/ThemeToggle";
@@ -122,6 +124,16 @@ const AppLayout = () => {
       key: "/reports",
       icon: <BarChartOutlined />,
       label: <Link to="/reports">Reports</Link>,
+    },
+    {
+      key: "/workload",
+      icon: <DashboardOutlined />,
+      label: <Link to="/workload">Workload Analytics</Link>,
+    },
+    {
+      key: "/work-shifts",
+      icon: <ScheduleOutlined />,
+      label: <Link to="/work-shifts">Quản lý ca</Link>,
     },
     {
       key: "/actionlog",

@@ -11,6 +11,8 @@ import Attendance from "./Attendance.jsx";
 import LeaveRequest from "./LeaveRequest.jsx";
 import Performance from "./Performance.jsx";
 import Reports from "./Reports.jsx";
+import WorkloadAnalytics from "./WorkloadAnalytics.jsx";
+import WorkShiftManagement from "./WorkShiftManagement.jsx";
 
 export { 
   Home, 
@@ -25,5 +27,7 @@ export {
   Attendance,
   LeaveRequest,
   Performance,
-  Reports
+  Reports,
+  WorkloadAnalytics,
+  WorkShiftManagement
 };

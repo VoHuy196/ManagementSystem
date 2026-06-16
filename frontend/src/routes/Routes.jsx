@@ -18,6 +18,8 @@ import {
   LeaveRequest,
   Performance,
   Reports,
+  WorkloadAnalytics,
+  WorkShiftManagement,
 } from "../pages";
 import ThemeTest from "../pages/ThemeTest";
 import Layout from "../layout";
@@ -108,6 +110,22 @@ const AppRoutes = createBrowserRouter(
         element={
           <ProtectedRoutes>
             <Reports />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/workload"
+        element={
+          <ProtectedRoutes>
+            <WorkloadAnalytics />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/work-shifts"
+        element={
+          <ProtectedRoutes>
+            <WorkShiftManagement />
           </ProtectedRoutes>
         }
       />
