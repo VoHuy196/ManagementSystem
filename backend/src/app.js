@@ -44,6 +44,7 @@ import statsRoutes from "./routes/stats.route.js";
 import workShiftRoutes from "./routes/workShift.route.js";
 import workSessionRoutes from "./routes/workSession.route.js";
 import workloadStatsRoutes from "./routes/workloadStats.route.js";
+import documentRoutes from "./routes/document.route.js";
 
 // implement routing
 app.use("/api/auth", authRoutes);
@@ -59,6 +60,7 @@ app.use("/api/stats", statsRoutes);
 app.use("/api/work-shifts", workShiftRoutes);
 app.use("/api/work-sessions", workSessionRoutes);
 app.use("/api/workload-stats", workloadStatsRoutes);
+app.use("/api/documents", documentRoutes);
 
 app.use(errorHandler);
 

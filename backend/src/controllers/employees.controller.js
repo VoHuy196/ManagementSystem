@@ -14,7 +14,7 @@ const getEmployees = asyncHandler(async (req, res) => {
 });
 
 const createEmployee = asyncHandler(async (req, res) => {
-  const { employeeCode, name, birthday, joinDate, user } = req.body;
+  const { employeeCode, name, birthday, joinDate, user, department } = req.body;
 
   if (!employeeCode || !name || !joinDate) {
     throw new ApiError(400, "Employee code, name, and join date are required");
@@ -32,6 +32,7 @@ const createEmployee = asyncHandler(async (req, res) => {
     birthday,
     joinDate,
     user,
+    department: department || "",
   });
 
   const createdEmployee = await Employee.findById(employee._id)
@@ -44,7 +45,7 @@ const createEmployee = asyncHandler(async (req, res) => {
 
 const updateEmployee = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { employeeCode, name, birthday, joinDate, user } = req.body;
+  const { employeeCode, name, birthday, joinDate, user, department } = req.body;
 
   if (!id) {
     throw new ApiError(400, "Employee ID is required");
@@ -68,6 +69,7 @@ const updateEmployee = asyncHandler(async (req, res) => {
   if (birthday !== undefined) employee.birthday = birthday;
   if (joinDate !== undefined) employee.joinDate = joinDate;
   if (user !== undefined) employee.user = user;
+  if (department !== undefined) employee.department = department;
 
   const updatedEmployee = await employee.save();
 

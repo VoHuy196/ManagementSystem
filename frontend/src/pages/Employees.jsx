@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { ProTable } from "@ant-design/pro-components";
-import { Button, Space, Typography, Tooltip, Popconfirm } from "antd";
+import { Button, Space, Typography, Tooltip, Popconfirm, Tag } from "antd";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { getEmployees, deleteEmployee } from "../services/employeeApi.js";
 import EmployeeModal from "../modal/EmployeeModal.jsx";
@@ -37,6 +37,12 @@ const Employees = () => {
       copyable: true,
       search: true,
       render: (text) => <Text strong>{text}</Text>,
+    },
+    {
+      title: "Department",
+      dataIndex: "department",
+      search: true,
+      render: (text) => text ? <Tag color="geekblue">{text}</Tag> : <Text type="secondary">—</Text>,
     },
     {
       title: "Birthday",
@@ -112,6 +118,11 @@ const Employees = () => {
           if (params.employeeCode) {
             data = data.filter((item) =>
               item.employeeCode.toLowerCase().includes(params.employeeCode.toLowerCase())
+            );
+          }
+          if (params.department) {
+            data = data.filter((item) =>
+              item.department && item.department.toLowerCase().includes(params.department.toLowerCase())
             );
           }
 

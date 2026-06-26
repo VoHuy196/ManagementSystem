@@ -17,6 +17,7 @@ import {
   TrophyOutlined,
   DashboardOutlined,
   ScheduleOutlined,
+  FolderOpenOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "./context/AuthContext";
 import ThemeToggle from "./components/ThemeToggle";
@@ -134,6 +135,11 @@ const AppLayout = () => {
       key: "/work-shifts",
       icon: <ScheduleOutlined />,
       label: <Link to="/work-shifts">Quản lý ca</Link>,
+    },
+    {
+      key: "/documents",
+      icon: <FolderOpenOutlined />,
+      label: <Link to="/documents">Quản lý văn bản</Link>,
     },
     {
       key: "/actionlog",

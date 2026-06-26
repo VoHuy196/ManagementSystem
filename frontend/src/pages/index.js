@@ -13,6 +13,7 @@ import Performance from "./Performance.jsx";
 import Reports from "./Reports.jsx";
 import WorkloadAnalytics from "./WorkloadAnalytics.jsx";
 import WorkShiftManagement from "./WorkShiftManagement.jsx";
+import DocumentManagement from "./DocumentManagement.jsx";
 
 export { 
   Home, 
@@ -29,5 +30,6 @@ export {
   Performance,
   Reports,
   WorkloadAnalytics,
-  WorkShiftManagement
+  WorkShiftManagement,
+  DocumentManagement
 };

@@ -20,6 +20,7 @@ import {
   Reports,
   WorkloadAnalytics,
   WorkShiftManagement,
+  DocumentManagement,
 } from "../pages";
 import ThemeTest from "../pages/ThemeTest";
 import Layout from "../layout";
@@ -126,6 +127,14 @@ const AppRoutes = createBrowserRouter(
         element={
           <ProtectedRoutes>
             <WorkShiftManagement />
+          </ProtectedRoutes>
+        }
+      />
+      <Route
+        path="/documents"
+        element={
+          <ProtectedRoutes>
+            <DocumentManagement />
           </ProtectedRoutes>
         }
       />

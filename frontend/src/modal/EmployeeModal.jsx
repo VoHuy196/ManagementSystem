@@ -5,6 +5,8 @@ import API from "../services/apiHandler.js";
 import toast from "react-hot-toast";
 import dayjs from "dayjs";
 
+const DEPARTMENTS = ["HR", "Engineering", "Marketing", "Sales", "Finance", "Operations", "General"];
+
 const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
   const [form] = Form.useForm();
   const [users, setUsers] = useState([]);
@@ -43,6 +45,7 @@ const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
           birthday: employee.birthday ? dayjs(employee.birthday) : null,
           joinDate: employee.joinDate ? dayjs(employee.joinDate) : null,
           user: employee.user?._id || employee.user || undefined,
+          department: employee.department || undefined,
         });
       } else {
         form.resetFields();
@@ -134,6 +137,18 @@ const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
               value: u._id,
               label: `${u.fullName} ${u.email ? `(${u.email})` : ""}`,
             }))}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="department"
+          label="Department"
+          rules={[{ required: true, message: "Please select department" }]}
+        >
+          <Select
+            placeholder="Select department"
+            allowClear
+            options={DEPARTMENTS.map((dept) => ({ value: dept, label: dept }))}
           />
         </Form.Item>
 
