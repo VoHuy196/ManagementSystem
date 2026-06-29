@@ -19,15 +19,10 @@ const getDocuments = asyncHandler(async (req, res) => {
 
   if (userRole !== "Admin") {
     const userDept = await getUserDepartment(req.user._id);
-    
-    // If not Admin, user can only see documents from their department OR created by them
     if (userDept) {
-      filter.$or = [
-        { createdBy: req.user._id },
-        { department: userDept },
-      ];
+      filter.department = userDept;
     } else {
-      filter.createdBy = req.user._id;
+      filter.department = "__NONE__"; // User has no department, block all viewing
     }
   }
 
@@ -53,10 +48,7 @@ const getDocumentDetails = asyncHandler(async (req, res) => {
 
   // Check access permissions
   const userRole = req.user.role;
-  const creatorId = document.createdBy?._id || document.createdBy;
-  const isCreator = creatorId && creatorId.toString() === req.user._id.toString();
-
-  if (userRole !== "Admin" && !isCreator) {
+  if (userRole !== "Admin") {
     const userDept = await getUserDepartment(req.user._id);
     if (!userDept || userDept !== document.department) {
       throw new ApiError(403, "You do not have permission to view this document");
@@ -76,6 +68,15 @@ const createDocument = asyncHandler(async (req, res) => {
 
   if (!title || !category || !department) {
     throw new ApiError(400, "Title, category, and department are required");
+  }
+
+  // Check create permissions: non-admin can only create in their own department
+  const userRole = req.user.role;
+  if (userRole !== "Admin") {
+    const userDept = await getUserDepartment(req.user._id);
+    if (!userDept || userDept !== department) {
+      throw new ApiError(403, "You can only create documents for your own department");
+    }
   }
 
   const document = await Document.create({
@@ -115,13 +116,14 @@ const updateDocument = asyncHandler(async (req, res) => {
 
   // Check write permissions
   const userRole = req.user.role;
-  const creatorId = document.createdBy?._id || document.createdBy;
-  const isCreator = creatorId && creatorId.toString() === req.user._id.toString();
-
-  if (userRole !== "Admin" && !isCreator) {
+  if (userRole !== "Admin") {
     const userDept = await getUserDepartment(req.user._id);
     if (!userDept || userDept !== document.department) {
       throw new ApiError(403, "You do not have permission to edit this document");
+    }
+    // Loophole fix: non-admins cannot change the document's department to something they don't belong to
+    if (department !== undefined && department !== userDept) {
+      throw new ApiError(403, "You cannot assign this document to another department");
     }
   }
 
@@ -158,13 +160,16 @@ const deleteDocument = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Document not found");
   }
 
-  // Check delete permissions: Admin or Creator
+  // Check delete permissions: Admin or Creator in same department
   const userRole = req.user.role;
   const creatorId = document.createdBy?._id || document.createdBy;
   const isCreator = creatorId && creatorId.toString() === req.user._id.toString();
-
-  if (userRole !== "Admin" && !isCreator) {
-    throw new ApiError(403, "Only Admin or the document creator can delete this document");
+ 
+  if (userRole !== "Admin") {
+    const userDept = await getUserDepartment(req.user._id);
+    if (!isCreator || !userDept || userDept !== document.department) {
+      throw new ApiError(403, "Only the creator belonging to the same department or Admin can delete this document");
+    }
   }
 
   await Document.findByIdAndDelete(id);

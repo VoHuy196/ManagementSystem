@@ -103,6 +103,9 @@ const DocumentManagement = () => {
   const handleOpenCreate = () => {
     setEditingDoc(null);
     form.resetFields();
+    if (currentUser && currentUser.role !== "Admin") {
+      form.setFieldsValue({ department: userDept });
+    }
     setModalOpen(true);
   };
 
@@ -168,10 +171,8 @@ const DocumentManagement = () => {
     if (!currentUser) return false;
     if (currentUser.role === "Admin") return true;
     
-    const isCreator = doc.createdBy?._id === currentUser._id || doc.createdBy === currentUser._id;
     const sameDept = userDept && doc.department === userDept;
-    
-    return isCreator || sameDept;
+    return sameDept;
   };
 
   const hasDeletePermission = (doc) => {
@@ -179,7 +180,8 @@ const DocumentManagement = () => {
     if (currentUser.role === "Admin") return true;
     
     const isCreator = doc.createdBy?._id === currentUser._id || doc.createdBy === currentUser._id;
-    return isCreator;
+    const sameDept = userDept && doc.department === userDept;
+    return isCreator && sameDept;
   };
 
   // Filtered documents
@@ -331,6 +333,7 @@ const DocumentManagement = () => {
           icon={<PlusOutlined />}
           size="large"
           onClick={handleOpenCreate}
+          disabled={currentUser?.role !== "Admin" && !userDept}
           style={{
             borderRadius: "8px",
             height: "44px",
@@ -354,14 +357,16 @@ const DocumentManagement = () => {
             style={{ width: 180 }}
             options={CATEGORIES.map((c) => ({ label: c, value: c }))}
           />
-          <Select
-            allowClear
-            placeholder="Tất cả phòng ban"
-            value={deptFilter}
-            onChange={setDeptFilter}
-            style={{ width: 180 }}
-            options={DEPARTMENTS.map((d) => ({ label: d, value: d }))}
-          />
+          {currentUser?.role === "Admin" && (
+            <Select
+              allowClear
+              placeholder="Tất cả phòng ban"
+              value={deptFilter}
+              onChange={setDeptFilter}
+              style={{ width: 180 }}
+              options={DEPARTMENTS.map((d) => ({ label: d, value: d }))}
+            />
+          )}
         </Space>
 
         <Table
@@ -424,7 +429,7 @@ const DocumentManagement = () => {
                 label="Phòng ban có quyền xem/sửa"
                 rules={[{ required: true, message: "Chọn phòng ban!" }]}
               >
-                <Select placeholder="Chọn phòng ban...">
+                <Select placeholder="Chọn phòng ban..." disabled={currentUser?.role !== "Admin"}>
                   {DEPARTMENTS.map((dept) => (
                     <Select.Option key={dept} value={dept}>
                       {dept}
