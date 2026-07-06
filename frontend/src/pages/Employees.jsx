@@ -5,10 +5,15 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { getEmployees, deleteEmployee } from "../services/employeeApi.js";
 import EmployeeModal from "../modal/EmployeeModal.jsx";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 const { Text } = Typography;
 
 const Employees = () => {
+  const { user } = useAuth();
+  const currentUser = user?.data?.user;
+  const isAdmin = currentUser?.role === "Admin";
+
   const actionRef = useRef();
   const [showModal, setShowModal] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
@@ -103,7 +108,7 @@ const Employees = () => {
   return (
     <>
       <ProTable
-        columns={columns}
+        columns={isAdmin ? columns : columns.filter(col => col.key !== "option" && col.title !== "Actions")}
         actionRef={actionRef}
         cardBordered
         request={async (params) => {
@@ -146,7 +151,7 @@ const Employees = () => {
         }}
         dateFormatter="string"
         headerTitle="Employee Management"
-        toolBarRender={() => [
+        toolBarRender={() => isAdmin ? [
           <Button
             key="button"
             icon={<PlusOutlined />}
@@ -158,7 +163,7 @@ const Employees = () => {
           >
             Add Employee
           </Button>,
-        ]}
+        ] : []}
       />
 
       {(showModal || editingEmployee) && (

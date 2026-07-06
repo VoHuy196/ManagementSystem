@@ -7,6 +7,7 @@ import {
   getMyEmployee,
 } from "../controllers/employees.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
+import authorizeRoles from "../middlewares/role.middleware.js";
 
 const router = express.Router();
 
@@ -16,8 +17,8 @@ router.use(authMiddleware);
 router.get("/me", getMyEmployee);
 
 router.get("/", getEmployees);
-router.post("/", createEmployee);
-router.put("/:id", updateEmployee);
-router.delete("/:id", deleteEmployee);
+router.post("/", authorizeRoles("Admin"), createEmployee);
+router.put("/:id", authorizeRoles("Admin"), updateEmployee);
+router.delete("/:id", authorizeRoles("Admin"), deleteEmployee);
 
 export default router;

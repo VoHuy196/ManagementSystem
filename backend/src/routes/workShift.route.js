@@ -13,8 +13,8 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get("/", getWorkShifts);
-router.post("/", authorizeRoles("admin"), createWorkShift);
-router.put("/:id", authorizeRoles("admin"), updateWorkShift);
-router.delete("/:id", authorizeRoles("admin"), deleteWorkShift);
+router.post("/", authorizeRoles("Admin"), createWorkShift);
+router.put("/:id", authorizeRoles("Admin"), updateWorkShift);
+router.delete("/:id", authorizeRoles("Admin"), deleteWorkShift);
 
 export default router;
