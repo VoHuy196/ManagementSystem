@@ -29,6 +29,7 @@ import toast from "react-hot-toast";
 import dayjs from "dayjs";
 import { useAuth } from "../context/AuthContext.jsx";
 import { getMyEmployee } from "../services/employeeApi.js";
+import socket from "../services/socketService";
 import {
   getDocuments,
   createDocument,
@@ -71,15 +72,39 @@ const DocumentManagement = () => {
   // Filters
   const [categoryFilter, setCategoryFilter] = useState(undefined);
   const [deptFilter, setDeptFilter] = useState(undefined);
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState("keyword");
   
   const [form] = Form.useForm();
 
+  // Listen for socket events
+  useEffect(() => {
+    const handleOcrFinished = (data) => {
+      if (data.ocrStatus === "Completed") {
+        toast.success(`Tài liệu "${data.title}" đã được AI phân tích & OCR xong!`);
+      } else {
+        toast.error(`AI quét tài liệu "${data.title}" thất bại.`);
+      }
+      fetchData({
+        search: searchQuery || undefined,
+        searchType: searchQuery ? searchType : undefined
+      });
+    };
+
+    socket.on("documentOcrFinished", handleOcrFinished);
+    return () => {
+      socket.off("documentOcrFinished", handleOcrFinished);
+    };
+  }, [searchQuery, searchType]);
+
   // Fetch documents and user department
-  const fetchData = async () => {
+  const fetchData = async (searchParams = {}) => {
     setLoading(true);
     try {
       const [docsRes, empRes] = await Promise.all([
-        getDocuments(),
+        getDocuments(searchParams),
         getMyEmployee().catch(() => null), // Catch errors if profile doesn't exist
       ]);
 
@@ -94,6 +119,13 @@ const DocumentManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = () => {
+    fetchData({
+      search: searchQuery.trim() || undefined,
+      searchType: searchQuery.trim() ? searchType : undefined
+    });
   };
 
   useEffect(() => {
@@ -200,15 +232,36 @@ const DocumentManagement = () => {
       key: "title",
       render: (text, record) => (
         <Space direction="vertical" size={2}>
-          <Space>
+          <Space wrap>
             <FileTextOutlined style={{ color: "#1890ff", fontSize: "16px" }} />
             <Text strong style={{ fontSize: "14px" }}>{text}</Text>
+            {record.similarityScore !== undefined && (
+              <Tag color={record.similarityScore >= 75 ? "green" : record.similarityScore >= 50 ? "blue" : "orange"}>
+                AI Match: {record.similarityScore}%
+              </Tag>
+            )}
+            {record.ocrStatus && record.ocrStatus !== "Completed" && (
+              <Tag color={record.ocrStatus === "Processing" ? "processing" : record.ocrStatus === "Pending" ? "default" : "error"}>
+                AI OCR: {record.ocrStatus === "Processing" ? "Đang phân tích..." : record.ocrStatus === "Pending" ? "Chờ hàng đợi..." : "Lỗi"}
+              </Tag>
+            )}
           </Space>
-          {record.description && (
+          {record.snippet ? (
+            <div style={{ marginLeft: "20px", marginTop: "2px" }}>
+              <Text type="secondary" style={{ fontSize: "12px", display: "block" }}>
+                <span dangerouslySetInnerHTML={{ 
+                  __html: record.snippet.replace(
+                    new RegExp(`(${searchQuery})`, "gi"), 
+                    "<mark style='background-color: #ffe58f; padding: 0 2px;'>$1</mark>"
+                  ) 
+                }} />
+              </Text>
+            </div>
+          ) : record.description ? (
             <Text type="secondary" style={{ fontSize: "12px", marginLeft: "20px" }}>
               {record.description}
             </Text>
-          )}
+          ) : null}
         </Space>
       ),
     },
@@ -347,27 +400,49 @@ const DocumentManagement = () => {
 
       {/* Filter and Content */}
       <Card style={{ borderRadius: "12px", marginBottom: 16 }}>
-        <Space wrap size="middle" style={{ marginBottom: 16 }}>
-          <Text strong>Bộ lọc:</Text>
-          <Select
-            allowClear
-            placeholder="Tất cả loại văn bản"
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-            style={{ width: 180 }}
-            options={CATEGORIES.map((c) => ({ label: c, value: c }))}
-          />
-          {currentUser?.role === "Admin" && (
+        <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 16 }}>
+          <Space wrap size="middle">
+            <Text strong>Bộ lọc:</Text>
             <Select
               allowClear
-              placeholder="Tất cả phòng ban"
-              value={deptFilter}
-              onChange={setDeptFilter}
+              placeholder="Tất cả loại văn bản"
+              value={categoryFilter}
+              onChange={setCategoryFilter}
               style={{ width: 180 }}
-              options={DEPARTMENTS.map((d) => ({ label: d, value: d }))}
+              options={CATEGORIES.map((c) => ({ label: c, value: c }))}
             />
-          )}
-        </Space>
+            {currentUser?.role === "Admin" && (
+              <Select
+                allowClear
+                placeholder="Tất cả phòng ban"
+                value={deptFilter}
+                onChange={setDeptFilter}
+                style={{ width: 180 }}
+                options={DEPARTMENTS.map((d) => ({ label: d, value: d }))}
+              />
+            )}
+          </Space>
+
+          <Space.Compact style={{ width: 400 }}>
+            <Input
+              placeholder={searchType === "ai" ? "Hỏi AI về nội dung tài liệu..." : "Tìm kiếm từ khóa..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onPressEnter={handleSearch}
+              allowClear
+            />
+            <Select
+              value={searchType}
+              onChange={setSearchType}
+              style={{ width: 110 }}
+              options={[
+                { label: "Từ khóa", value: "keyword" },
+                { label: "AI Search", value: "ai" }
+              ]}
+            />
+            <Button type="primary" onClick={handleSearch}>Tìm</Button>
+          </Space.Compact>
+        </div>
 
         <Table
           dataSource={filteredDocuments}

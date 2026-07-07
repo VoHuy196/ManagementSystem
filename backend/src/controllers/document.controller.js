@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Document } from "../models/document.model.js";
 import { Employee } from "../models/employees.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -10,11 +11,38 @@ const getUserDepartment = async (userId) => {
   return employee ? employee.department : "";
 };
 
+const cosineSimilarity = (vecA, vecB) => {
+  if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+};
+
+const getSnippet = (text, query) => {
+  if (!text) return "";
+  const cleanQuery = query.toLowerCase().trim();
+  const idx = text.toLowerCase().indexOf(cleanQuery);
+  if (idx !== -1) {
+    const start = Math.max(0, idx - 60);
+    const end = Math.min(text.length, idx + cleanQuery.length + 80);
+    return (start > 0 ? "..." : "") + text.substring(start, end) + (end < text.length ? "..." : "");
+  }
+  return text.substring(0, 150) + (text.length > 150 ? "..." : "");
+};
+
 // @desc    Get all documents based on department visibility
 // @route   GET /api/documents
 // @access  Private
 const getDocuments = asyncHandler(async (req, res) => {
   const userRole = req.user.role; // "Admin", "Manager", "Employee"
+  const { search, searchType } = req.query;
   const filter = {};
 
   if (userRole !== "Admin") {
@@ -26,9 +54,69 @@ const getDocuments = asyncHandler(async (req, res) => {
     }
   }
 
-  const documents = await Document.find(filter)
+  // Keyword search filter
+  if (search && searchType !== "ai") {
+    const regex = new RegExp(search, "i");
+    filter.$or = [
+      { title: regex },
+      { description: regex },
+      { extractedText: regex }
+    ];
+  }
+
+  let documents = await Document.find(filter)
     .populate("createdBy", "fullName email")
     .sort({ createdAt: -1 });
+
+  // AI Semantic search
+  if (search && searchType === "ai") {
+    try {
+      console.log(`[AI SEARCH] Vectorizing query: "${search}"`);
+      const vectorizeResponse = await axios.post("http://localhost:8000/ai/vectorize", {
+        text: search
+      }, { timeout: 3000 });
+
+      if (vectorizeResponse.status === 200 && vectorizeResponse.data?.vector) {
+        const queryVector = vectorizeResponse.data.vector;
+        
+        // Calculate similarity for each document
+        const docsWithScores = documents.map(doc => {
+          let score = 0;
+          if (doc.vectorEmbedding && doc.vectorEmbedding.length > 0) {
+            score = cosineSimilarity(queryVector, doc.vectorEmbedding);
+          } else {
+            const textToMatch = `${doc.title} ${doc.description} ${doc.extractedText}`.toLowerCase();
+            score = textToMatch.includes(search.toLowerCase()) ? 0.3 : 0.0;
+          }
+
+          return {
+            ...doc.toObject(),
+            similarityScore: Math.round(score * 100),
+            snippet: getSnippet(doc.extractedText || doc.description || "", search)
+          };
+        });
+
+        // Filter and sort by score
+        documents = docsWithScores
+          .filter(doc => doc.similarityScore >= 25 || (doc.title && doc.title.toLowerCase().includes(search.toLowerCase())))
+          .sort((a, b) => b.similarityScore - a.similarityScore);
+
+        return res.status(200).json(
+          new ApiResponse(200, { documents }, "AI Semantic search completed successfully")
+        );
+      }
+    } catch (error) {
+      console.error("[AI SEARCH] Failed to run vector search:", error.message);
+      // Fallback
+      const regex = new RegExp(search, "i");
+      const fallbackDocs = documents.filter(doc => 
+        regex.test(doc.title) || regex.test(doc.description) || regex.test(doc.extractedText)
+      );
+      return res.status(200).json(
+        new ApiResponse(200, { documents: fallbackDocs, warning: "AI Offline, fallback to keyword search" }, "Keyword search fallback completed")
+      );
+    }
+  }
 
   res.status(200).json(
     new ApiResponse(200, { documents }, "Documents fetched successfully")
@@ -130,7 +218,14 @@ const updateDocument = asyncHandler(async (req, res) => {
   // Update fields
   if (title !== undefined) document.title = title;
   if (description !== undefined) document.description = description;
-  if (fileUrl !== undefined) document.fileUrl = fileUrl;
+  if (fileUrl !== undefined) {
+    if (fileUrl !== document.fileUrl) {
+      document.fileUrl = fileUrl;
+      document.ocrStatus = "Pending";
+      document.extractedText = "";
+      document.vectorEmbedding = [];
+    }
+  }
   if (category !== undefined) document.category = category;
   if (department !== undefined) document.department = department;
   if (status !== undefined) document.status = status;

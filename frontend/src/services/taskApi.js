@@ -6,7 +6,8 @@ const updateTask = (id, data) => API.patch(`/tasks/updatetask/${id}`, data);
 const updateTaskStatus = (id, status) =>
   API.patch(`/tasks/updatetaskstatus/${id}`, status);
 const deleteTask = (id) => API.delete(`/tasks/deletetask/${id}`);
-const smartAssign = (id) => API.post(`/tasks/assigntask/${id}`);
+const smartAssign = (id, userId) => API.post(`/tasks/assigntask/${id}`, userId ? { userId } : {});
+const getRecommendations = (id) => API.get(`/tasks/assigntask/${id}/recommend`);
 
 export {
   fetchTasks,
@@ -15,5 +16,6 @@ export {
   updateTaskStatus,
   deleteTask,
   smartAssign,
+  getRecommendations,
 };
 

@@ -1,5 +1,8 @@
+import axios from "axios";
 import { Task } from "../models/tasks.model.js";
 import { ActionLog } from "../models/actionLog.model.js";
+import { Employee } from "../models/employees.model.js";
+import { Performance } from "../models/performance.model.js";
 import smartAssign from "../utils/smartAssign.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
@@ -377,6 +380,122 @@ const assignTask = asyncHandler(async (req, res) => {
     );
 });
 
+const getTaskRecommendations = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new ApiError(400, "Task ID is required");
+  }
+
+  const task = await Task.findById(id);
+  if (!task) {
+    throw new ApiError(404, "Task not found");
+  }
+
+  // 1. Get all employees with user accounts
+  const employees = await Employee.find().populate("user");
+  
+  // Filter out admins/managers: only assign to "Employee" role users
+  const candidateEmployees = employees.filter(emp => emp.user && emp.user.role === "Employee");
+
+  if (candidateEmployees.length === 0) {
+    // If no candidate employees, allow all users with Employee role
+    const { User } = await import("../models/users.model.js");
+    const fallbackUsers = await User.find({ role: "Employee" });
+    if (fallbackUsers.length === 0) {
+      return res.status(200).json(new ApiResponse(200, { predictions: [] }, "No employees available"));
+    }
+    const predictions = fallbackUsers.map(u => ({
+      employeeId: u._id,
+      fullName: u.fullName,
+      confidence: 50,
+      reason: "Gợi ý mặc định (chưa liên kết hồ sơ nhân sự)"
+    }));
+    return res.status(200).json(new ApiResponse(200, { predictions }, "Fallback recommendations fetched"));
+  }
+
+  // 2. Fetch pending task counts for each candidate
+  const employeesData = await Promise.all(
+    candidateEmployees.map(async (emp) => {
+      const pendingTasksCount = await Task.countDocuments({
+        assignedTo: emp.user._id,
+        status: { $ne: "Done" }
+      });
+      return {
+        id: emp.user._id.toString(),
+        fullName: emp.name || emp.user.fullName,
+        department: emp.department || "General",
+        pendingTasksCount
+      };
+    })
+  );
+
+  // 3. Fetch historical completed tasks
+  const historicalTasks = await Task.find({
+    status: "Done",
+    assignedTo: { $exists: true }
+  }).select("title description assignedTo status priority taskType").limit(100);
+
+  // We can attach average rating from Performance database if available
+  const historicalTasksData = await Promise.all(
+    historicalTasks.map(async (t) => {
+      // Find employee profile for this user
+      const emp = employees.find(e => e.user && e.user._id.toString() === t.assignedTo.toString());
+      let rating = 3.0; // default medium rating
+      if (emp) {
+        // Fetch average performance score
+        const perfs = await Performance.find({ employee: emp._id });
+        if (perfs.length > 0) {
+          const sum = perfs.reduce((acc, curr) => acc + curr.finalScore, 0);
+          rating = (sum / perfs.length) / 2.0; // scale 10 to 5
+        }
+      }
+      return {
+        title: t.title,
+        description: t.description || "",
+        assignedTo: t.assignedTo.toString(),
+        status: t.status,
+        rating
+      };
+    })
+  );
+
+  // 4. Send request to Python FastAPI AI microservice
+  try {
+    const aiResponse = await axios.post("http://localhost:8000/ai/predict-assignee", {
+      task: {
+        title: task.title,
+        description: task.description || "",
+        taskType: task.taskType || "Task",
+        priority: task.priority || "Medium"
+      },
+      employees: employeesData,
+      historicalTasks: historicalTasksData
+    }, { timeout: 4000 });
+
+    if (aiResponse.status === 200 && aiResponse.data?.predictions) {
+      return res.status(200).json(
+        new ApiResponse(200, { predictions: aiResponse.data.predictions }, "AI Recommendations fetched successfully")
+      );
+    }
+  } catch (error) {
+    console.error("AI Service Error:", error.message);
+  }
+
+  // Fallback: rule-based sorting if Python service is offline
+  const sortedCandidates = employeesData.sort((a, b) => a.pendingTasksCount - b.pendingTasksCount);
+  const predictions = sortedCandidates.slice(0, 3).map(emp => ({
+    employeeId: emp.id,
+    fullName: emp.fullName,
+    confidence: Math.max(50 - emp.pendingTasksCount * 2, 10),
+    reason: `Gợi ý theo tải lượng công việc hiện tại (${emp.pendingTasksCount} task đang xử lý - AI Offline).`
+  }));
+
+  res.status(200).json(
+    new ApiResponse(200, { predictions }, "Rule-based recommendations fetched (AI Offline)")
+  );
+});
+
 export {
   getTasks,
   createTask,
@@ -384,4 +503,5 @@ export {
   updateTaskStatus,
   deleteTask,
   assignTask,
+  getTaskRecommendations,
 };

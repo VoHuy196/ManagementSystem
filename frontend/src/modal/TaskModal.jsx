@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createTask, updateTask, smartAssign } from "../services/taskApi";
+import { createTask, updateTask, smartAssign, getRecommendations } from "../services/taskApi";
 import API from "../services/apiHandler";
 import socket from "../services/socketService";
 import toast from "react-hot-toast";
@@ -19,6 +19,9 @@ const TaskModal = ({ task, onClose, setConflict }) => {
   });
   const [originalTask, setOriginalTask] = useState(null);
   const [users, setUsers] = useState([]);
+  const [recs, setRecs] = useState([]);
+  const [loadingRecs, setLoadingRecs] = useState(false);
+  const [showRecsModal, setShowRecsModal] = useState(false);
 
   // Fetch users list for manual assignment dropdown
   useEffect(() => {
@@ -116,13 +119,33 @@ const TaskModal = ({ task, onClose, setConflict }) => {
   };
 
   const handleSmartAssign = async () => {
+    setLoadingRecs(true);
+    setShowRecsModal(true);
     try {
-      const res = await smartAssign(form._id);
+      const res = await getRecommendations(form._id);
+      if (res.data?.success) {
+        setRecs(res.data.data.predictions || []);
+      } else {
+        toast.error("Không thể lấy đề xuất phân công");
+        setShowRecsModal(false);
+      }
+    } catch (error) {
+      toast.error("Không thể kết nối đến AI Service");
+      setShowRecsModal(false);
+    } finally {
+      setLoadingRecs(false);
+    }
+  };
+
+  const confirmAssignment = async (userId, employeeName) => {
+    try {
+      const res = await smartAssign(form._id, userId);
       socket.emit("taskUpdated", res.data);
-      toast.success("Task assigned successfully");
+      toast.success(`Đã phân công việc cho ${employeeName}`);
+      setShowRecsModal(false);
       onClose();
-    } catch {
-      toast.error("Failed to assign task");
+    } catch (error) {
+      toast.error("Phân công việc thất bại");
     }
   };
 
@@ -375,6 +398,107 @@ const TaskModal = ({ task, onClose, setConflict }) => {
           </div>
         </div>
       </div>
+
+      {/* AI Recommendations Modal */}
+      {showRecsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-65 flex justify-center items-center z-[60] p-4 animate-fade-in">
+          <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto transform scale-100 transition-all duration-300">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-800 pb-3">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <span className="text-xl">✨</span> AI Smart Assign Recommendation
+                </h3>
+                <button
+                  onClick={() => setShowRecsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {loadingRecs ? (
+                /* Pulsing AI Thinking state */
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                    <div className="absolute inset-2 rounded-full border-4 border-purple-500 border-b-transparent animate-spin-reverse opacity-75"></div>
+                    <div className="absolute inset-0 bg-blue-500 rounded-full opacity-10 animate-ping"></div>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 animate-pulse">
+                      AI đang phân tích yêu cầu công việc...
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Đang đánh giá năng lực phòng ban & tải lượng công việc hiện tại
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Recommendations list */
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    Dựa trên thông tin của task, AI đề xuất giao công việc này cho các ứng viên sau:
+                  </p>
+
+                  {recs.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      Không tìm thấy ứng viên Employee nào phù hợp.
+                    </div>
+                  ) : (
+                    recs.map((rec) => {
+                      const isHigh = rec.confidence >= 80;
+                      const isMedium = rec.confidence >= 60 && rec.confidence < 80;
+                      const confidenceColor = isHigh 
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : isMedium
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+                      
+                      return (
+                        <div 
+                          key={rec.employeeId} 
+                          className="border border-gray-150 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-700 p-4 rounded-xl flex items-start justify-between gap-4 transition-all hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
+                        >
+                          <div className="space-y-1.5 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-gray-900 dark:text-white">{rec.fullName}</span>
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${confidenceColor}`}>
+                                Phù hợp {rec.confidence}%
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                              💡 {rec.reason}
+                            </p>
+                          </div>
+                          
+                          <button
+                            onClick={() => confirmAssignment(rec.employeeId, rec.fullName)}
+                            className="bg-blue-600 text-white text-xs px-3.5 py-2 rounded-lg hover:bg-blue-500 font-semibold transition-all shadow-sm flex-shrink-0"
+                          >
+                            Gán việc
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+
+                  <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                    <button
+                      onClick={() => setShowRecsModal(false)}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                    >
+                      Quay lại chỉnh sửa
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

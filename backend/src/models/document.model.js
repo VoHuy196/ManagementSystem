@@ -35,6 +35,19 @@ const documentSchema = new mongoose.Schema(
       enum: ["Draft", "Published", "Archived"],
       default: "Published",
     },
+    vectorEmbedding: {
+      type: [Number],
+      default: [],
+    },
+    extractedText: {
+      type: String,
+      default: "",
+    },
+    ocrStatus: {
+      type: String,
+      enum: ["Pending", "Processing", "Completed", "Failed"],
+      default: "Pending",
+    },
   },
   { timestamps: true }
 );

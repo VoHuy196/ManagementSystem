@@ -1,5 +1,6 @@
-import { httpServer } from "./app.js";
+import { app, httpServer } from "./app.js";
 import connectDB from "./db/index.js";
+import { startDocumentWorker } from "./workers/documentWorker.js";
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +16,7 @@ connectDB()
       console.log(
         `🎉 [SERVER] Backend running successfully on http://localhost:${PORT}`
       );
+      startDocumentWorker(app);
     });
   })
   .catch((err) => {
