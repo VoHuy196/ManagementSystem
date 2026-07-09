@@ -46,6 +46,7 @@ const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
           joinDate: employee.joinDate ? dayjs(employee.joinDate) : null,
           user: employee.user?._id || employee.user || undefined,
           department: employee.department || undefined,
+          skills: employee.skills || [],
         });
       } else {
         form.resetFields();
@@ -149,6 +150,25 @@ const EmployeeModal = ({ employee, open, onClose, onSuccess }) => {
             placeholder="Select department"
             allowClear
             options={DEPARTMENTS.map((dept) => ({ value: dept, label: dept }))}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="skills"
+          label="Kỹ năng (Skills)"
+          tooltip="Nhập các kỹ năng và nhấn Enter để thêm. Dùng để AI gợi ý phân công chính xác hơn."
+        >
+          <Select
+            mode="tags"
+            placeholder="Ví dụ: React, Node.js, Tuyển dụng, Kế toán..."
+            tokenSeparators={[","]}
+            allowClear
+            options={[
+              "React", "Vue", "Angular", "Node.js", "Python", "Java", "C#",
+              "MongoDB", "MySQL", "Docker", "AWS", "CI/CD",
+              "Tuyển dụng", "Hành chính", "Lương thưởng",
+              "Kế toán", "Tài chính", "Bán hàng", "Marketing", "SEO", "Content"
+            ].map(s => ({ value: s, label: s }))}
           />
         </Form.Item>
 

@@ -39,6 +39,10 @@ const documentSchema = new mongoose.Schema(
       type: [Number],
       default: [],
     },
+    vectorChunks: {
+      type: [[Number]],  // Array of 384-dim chunk vectors
+      default: [],
+    },
     extractedText: {
       type: String,
       default: "",
@@ -47,6 +51,10 @@ const documentSchema = new mongoose.Schema(
       type: String,
       enum: ["Pending", "Processing", "Completed", "Failed"],
       default: "Pending",
+    },
+    retryCount: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

@@ -3,6 +3,7 @@ import { Task } from "../models/tasks.model.js";
 import { ActionLog } from "../models/actionLog.model.js";
 import { Employee } from "../models/employees.model.js";
 import { Performance } from "../models/performance.model.js";
+import { AssignmentFeedback } from "../models/assignmentFeedback.model.js";
 import smartAssign from "../utils/smartAssign.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
@@ -362,6 +363,25 @@ const assignTask = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to create action log for task assignment");
   }
 
+  // ── Save assignment feedback for AI learning ────────────────────────
+  // aiSuggested = true when the caller explicitly says so (passed as body flag)
+  try {
+    const empProfile = await Employee.findOne({ user: assignedUser._id }).select("department");
+    await AssignmentFeedback.create({
+      task: id,
+      assignedUser: assignedUser._id,
+      assignedBy: req.user._id,
+      taskType: task.taskType || "",
+      taskTitle: task.title || "",
+      department: empProfile?.department || "",
+      aiSuggested: req.body?.aiSuggested === true,
+      aiConfidenceShown: req.body?.aiConfidenceShown || 0,
+    });
+  } catch (fbErr) {
+    // Non-critical – don't fail the whole request
+    console.warn("[FEEDBACK] Could not save assignment feedback:", fbErr.message);
+  }
+
   // Populate for response
   const populatedTask = await Task.findById(updatedTask._id)
     .populate("assignedTo", "fullName")
@@ -414,7 +434,7 @@ const getTaskRecommendations = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, { predictions }, "Fallback recommendations fetched"));
   }
 
-  // 2. Fetch pending task counts for each candidate
+  // 2. Fetch pending task counts + skills for each candidate
   const employeesData = await Promise.all(
     candidateEmployees.map(async (emp) => {
       const pendingTasksCount = await Task.countDocuments({
@@ -425,10 +445,24 @@ const getTaskRecommendations = asyncHandler(async (req, res) => {
         id: emp.user._id.toString(),
         fullName: emp.name || emp.user.fullName,
         department: emp.department || "General",
-        pendingTasksCount
+        pendingTasksCount,
+        skills: emp.skills || []
       };
     })
   );
+
+  // 2b. Fetch recent assignment feedback (last 200 records) for AI learning
+  const recentFeedback = await AssignmentFeedback.find({})
+    .sort({ createdAt: -1 })
+    .limit(200)
+    .select("assignedUser taskType department aiSuggested");
+
+  const feedbackHistory = recentFeedback.map(fb => ({
+    assignedUserId: fb.assignedUser.toString(),
+    taskType: fb.taskType || "",
+    department: fb.department || "",
+    aiSuggested: fb.aiSuggested
+  }));
 
   // 3. Fetch historical completed tasks
   const historicalTasks = await Task.find({
@@ -470,8 +504,9 @@ const getTaskRecommendations = asyncHandler(async (req, res) => {
         priority: task.priority || "Medium"
       },
       employees: employeesData,
-      historicalTasks: historicalTasksData
-    }, { timeout: 4000 });
+      historicalTasks: historicalTasksData,
+      feedbackHistory          // ← new: manager choice history
+    }, { timeout: 8000 });    // increased timeout: cached embeddings are fast now
 
     if (aiResponse.status === 200 && aiResponse.data?.predictions) {
       return res.status(200).json(

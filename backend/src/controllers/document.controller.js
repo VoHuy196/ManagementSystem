@@ -1,4 +1,5 @@
 import axios from "axios";
+import FormData from "form-data";
 import { Document } from "../models/document.model.js";
 import { Employee } from "../models/employees.model.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -74,17 +75,24 @@ const getDocuments = asyncHandler(async (req, res) => {
       console.log(`[AI SEARCH] Vectorizing query: "${search}"`);
       const vectorizeResponse = await axios.post("http://localhost:8000/ai/vectorize", {
         text: search
-      }, { timeout: 3000 });
+      }, { timeout: 5000 });
 
       if (vectorizeResponse.status === 200 && vectorizeResponse.data?.vector) {
         const queryVector = vectorizeResponse.data.vector;
-        
+
         // Calculate similarity for each document
         const docsWithScores = documents.map(doc => {
           let score = 0;
-          if (doc.vectorEmbedding && doc.vectorEmbedding.length > 0) {
+
+          // ── Use chunk vectors if available (Priority 4 optimisation) ──
+          if (doc.vectorChunks && doc.vectorChunks.length > 0) {
+            // Best-chunk similarity: max over all chunks
+            const chunkScores = doc.vectorChunks.map(cv => cosineSimilarity(queryVector, cv));
+            score = Math.max(...chunkScores);
+          } else if (doc.vectorEmbedding && doc.vectorEmbedding.length > 0) {
             score = cosineSimilarity(queryVector, doc.vectorEmbedding);
           } else {
+            // Keyword fallback for documents not yet OCRed
             const textToMatch = `${doc.title} ${doc.description} ${doc.extractedText}`.toLowerCase();
             score = textToMatch.includes(search.toLowerCase()) ? 0.3 : 0.0;
           }
@@ -98,7 +106,7 @@ const getDocuments = asyncHandler(async (req, res) => {
 
         // Filter and sort by score
         documents = docsWithScores
-          .filter(doc => doc.similarityScore >= 25 || (doc.title && doc.title.toLowerCase().includes(search.toLowerCase())))
+          .filter(doc => doc.similarityScore >= 20 || (doc.title && doc.title.toLowerCase().includes(search.toLowerCase())))
           .sort((a, b) => b.similarityScore - a.similarityScore);
 
         return res.status(200).json(
@@ -107,9 +115,9 @@ const getDocuments = asyncHandler(async (req, res) => {
       }
     } catch (error) {
       console.error("[AI SEARCH] Failed to run vector search:", error.message);
-      // Fallback
+      // Fallback to keyword search
       const regex = new RegExp(search, "i");
-      const fallbackDocs = documents.filter(doc => 
+      const fallbackDocs = documents.filter(doc =>
         regex.test(doc.title) || regex.test(doc.description) || regex.test(doc.extractedText)
       );
       return res.status(200).json(
@@ -280,10 +288,59 @@ const deleteDocument = asyncHandler(async (req, res) => {
   );
 });
 
+// @desc  Upload a document file (multipart) and immediately queue OCR
+// @route POST /api/documents/upload
+// @access Private
+const uploadDocumentFile = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, "No file uploaded. Please send a multipart/form-data request with a 'file' field.");
+  }
+
+  const { title, description, category, department, status } = req.body;
+
+  if (!title || !category || !department) {
+    throw new ApiError(400, "title, category and department are required fields.");
+  }
+
+  const userRole = req.user.role;
+  if (userRole !== "Admin") {
+    const userDept = await getUserDepartment(req.user._id);
+    if (userDept && userDept !== department) {
+      throw new ApiError(403, "You can only upload documents to your own department.");
+    }
+  }
+
+  // Store file as base64 in a temporary field so the worker can access it
+  // In production you'd upload to S3/Cloudinary here and save the URL instead
+  const fileBuffer = req.file.buffer;
+  const originalName = req.file.originalname;
+  const mimeType = req.file.mimetype;
+
+  const document = await Document.create({
+    title,
+    description: description || "",
+    category,
+    department,
+    status: status || "Published",
+    createdBy: req.user._id,
+    ocrStatus: "Pending",
+    // Store as data URI so worker can process without re-downloading
+    fileUrl: `data:${mimeType};name=${encodeURIComponent(originalName)};base64,${fileBuffer.toString("base64")}`,
+  });
+
+  const io = req.app.get("io");
+  if (io) io.emit("documentCreated", { document });
+
+  res.status(201).json(
+    new ApiResponse(201, { document }, "Document uploaded successfully. AI OCR queued.")
+  );
+});
+
 export {
   getDocuments,
   getDocumentDetails,
   createDocument,
+  uploadDocumentFile,
   updateDocument,
   deleteDocument,
 };

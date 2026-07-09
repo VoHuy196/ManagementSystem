@@ -137,9 +137,12 @@ const TaskModal = ({ task, onClose, setConflict }) => {
     }
   };
 
-  const confirmAssignment = async (userId, employeeName) => {
+  const confirmAssignment = async (userId, employeeName, recIndex, confidence) => {
     try {
-      const res = await smartAssign(form._id, userId);
+      const res = await smartAssign(form._id, userId, {
+        aiSuggested: recIndex === 0,        // true only if the manager picks AI's top suggestion
+        aiConfidenceShown: confidence || 0,
+      });
       socket.emit("taskUpdated", res.data);
       toast.success(`Đã phân công việc cho ${employeeName}`);
       setShowRecsModal(false);
@@ -448,7 +451,7 @@ const TaskModal = ({ task, onClose, setConflict }) => {
                       Không tìm thấy ứng viên Employee nào phù hợp.
                     </div>
                   ) : (
-                    recs.map((rec) => {
+                    recs.map((rec, recIndex) => {
                       const isHigh = rec.confidence >= 80;
                       const isMedium = rec.confidence >= 60 && rec.confidence < 80;
                       const confidenceColor = isHigh 
@@ -475,7 +478,7 @@ const TaskModal = ({ task, onClose, setConflict }) => {
                           </div>
                           
                           <button
-                            onClick={() => confirmAssignment(rec.employeeId, rec.fullName)}
+                            onClick={() => confirmAssignment(rec.employeeId, rec.fullName, recIndex, rec.confidence)}
                             className="bg-blue-600 text-white text-xs px-3.5 py-2 rounded-lg hover:bg-blue-500 font-semibold transition-all shadow-sm flex-shrink-0"
                           >
                             Gán việc
