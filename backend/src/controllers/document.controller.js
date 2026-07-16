@@ -80,23 +80,91 @@ const getDocuments = asyncHandler(async (req, res) => {
       if (vectorizeResponse.status === 200 && vectorizeResponse.data?.vector) {
         const queryVector = vectorizeResponse.data.vector;
 
-        // Calculate similarity for each document
+        // ── Build department pre-filter for $vectorSearch ──────────────────
+        const preFilter = {};
+        if (userRole !== "Admin") {
+          const userDept = await getUserDepartment(req.user._id);
+          if (userDept) {
+            preFilter.department = { $eq: userDept };
+          } else {
+            // User has no department → return empty
+            return res.status(200).json(
+              new ApiResponse(200, { documents: [] }, "No department access")
+            );
+          }
+        }
+
+        // ── Try Atlas $vectorSearch (kNN index on vectorEmbedding) ─────────
+        try {
+          const vectorSearchPipeline = [
+            {
+              $vectorSearch: {
+                index: "vectorEmbedding",        // Index name bạn đã tạo trên Atlas
+                path: "vectorEmbedding",          // Field chứa vector trong document
+                queryVector: queryVector,          // 384-dim vector từ Python AI
+                numCandidates: 150,               // Số ứng viên kNN xem xét (nên >= 10x limit)
+                limit: 20,                        // Số kết quả tối đa trả về
+                ...(Object.keys(preFilter).length > 0 && { filter: preFilter })
+              }
+            },
+            {
+              $addFields: {
+                vectorScore: { $meta: "vectorSearchScore" }
+              }
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "createdBy",
+                foreignField: "_id",
+                as: "createdByInfo",
+                pipeline: [{ $project: { fullName: 1, email: 1 } }]
+              }
+            },
+            {
+              $addFields: {
+                createdBy: { $arrayElemAt: ["$createdByInfo", 0] }
+              }
+            },
+            { $unset: "createdByInfo" }
+          ];
+
+          const atlasResults = await Document.aggregate(vectorSearchPipeline);
+
+          if (atlasResults.length > 0) {
+            const docsWithScores = atlasResults
+              .filter(doc => (doc.vectorScore || 0) >= 0.20)
+              .map(doc => ({
+                ...doc,
+                similarityScore: Math.round((doc.vectorScore || 0) * 100),
+                snippet: getSnippet(doc.extractedText || doc.description || "", search)
+              }));
+
+            console.log(`[AI SEARCH] Atlas $vectorSearch returned ${atlasResults.length} results, ${docsWithScores.length} above threshold`);
+            return res.status(200).json(
+              new ApiResponse(200, { documents: docsWithScores, source: "atlas_vector_search" }, "AI Semantic search via Atlas completed")
+            );
+          }
+
+          // Atlas returned 0 results → fall through to JS cosine fallback
+          console.log("[AI SEARCH] Atlas returned 0 results, falling back to JS cosine similarity");
+        } catch (atlasErr) {
+          // $vectorSearch fails if index is not yet active / wrong config → fall back gracefully
+          console.warn("[AI SEARCH] Atlas $vectorSearch failed, falling back to JS cosine:", atlasErr.message);
+        }
+
+        // ── Fallback: JS cosine similarity (runs on already-fetched documents) ──
         const docsWithScores = documents.map(doc => {
           let score = 0;
-
-          // ── Use chunk vectors if available (Priority 4 optimisation) ──
           if (doc.vectorChunks && doc.vectorChunks.length > 0) {
-            // Best-chunk similarity: max over all chunks
             const chunkScores = doc.vectorChunks.map(cv => cosineSimilarity(queryVector, cv));
             score = Math.max(...chunkScores);
           } else if (doc.vectorEmbedding && doc.vectorEmbedding.length > 0) {
             score = cosineSimilarity(queryVector, doc.vectorEmbedding);
           } else {
-            // Keyword fallback for documents not yet OCRed
             const textToMatch = `${doc.title} ${doc.description} ${doc.extractedText}`.toLowerCase();
             score = textToMatch.includes(search.toLowerCase()) ? 0.3 : 0.0;
           }
-
           return {
             ...doc.toObject(),
             similarityScore: Math.round(score * 100),
@@ -104,18 +172,17 @@ const getDocuments = asyncHandler(async (req, res) => {
           };
         });
 
-        // Filter and sort by score
         documents = docsWithScores
           .filter(doc => doc.similarityScore >= 20 || (doc.title && doc.title.toLowerCase().includes(search.toLowerCase())))
           .sort((a, b) => b.similarityScore - a.similarityScore);
 
         return res.status(200).json(
-          new ApiResponse(200, { documents }, "AI Semantic search completed successfully")
+          new ApiResponse(200, { documents, source: "js_cosine_fallback" }, "AI Semantic search (JS fallback) completed")
         );
       }
     } catch (error) {
       console.error("[AI SEARCH] Failed to run vector search:", error.message);
-      // Fallback to keyword search
+      // Final fallback: keyword search
       const regex = new RegExp(search, "i");
       const fallbackDocs = documents.filter(doc =>
         regex.test(doc.title) || regex.test(doc.description) || regex.test(doc.extractedText)
