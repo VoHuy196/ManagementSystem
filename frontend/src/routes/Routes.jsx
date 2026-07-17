@@ -22,7 +22,6 @@ import {
   WorkShiftManagement,
   DocumentManagement,
 } from "../pages";
-import ThemeTest from "../pages/ThemeTest";
 import Layout from "../layout";
 import ProtectedRoutes from "./ProtectedRoutes";
 
@@ -32,7 +31,6 @@ const AppRoutes = createBrowserRouter(
       <Route index element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/theme-test" element={<ThemeTest />} />
 
       <Route
         path="/logout"

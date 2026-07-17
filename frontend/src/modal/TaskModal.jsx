@@ -3,6 +3,8 @@ import { createTask, updateTask, smartAssign, getRecommendations } from "../serv
 import API from "../services/apiHandler";
 import socket from "../services/socketService";
 import toast from "react-hot-toast";
+import CommentSection from "../components/CommentSection.jsx";
+import AttachmentPanel from "../components/AttachmentPanel.jsx";
 
 const TaskModal = ({ task, onClose, setConflict }) => {
   const [form, setForm] = useState({
@@ -156,7 +158,7 @@ const TaskModal = ({ task, onClose, setConflict }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[92vh] overflow-y-auto">
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
@@ -399,6 +401,19 @@ const TaskModal = ({ task, onClose, setConflict }) => {
               {isExistingTask ? "Update Task" : "Create Task"}
             </button>
           </div>
+
+          {/* Attachments + Comments – only for existing tasks */}
+          {isExistingTask && (
+            <>
+              <div className="border-t border-gray-200 dark:border-gray-800 mt-6" />
+              <AttachmentPanel
+                taskId={form._id || task?._id}
+                initialAttachments={task?.attachments || []}
+              />
+              <div className="border-t border-gray-200 dark:border-gray-800 mt-5" />
+              <CommentSection taskId={form._id || task?._id} />
+            </>
+          )}
         </div>
       </div>
 

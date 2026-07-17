@@ -25,7 +25,7 @@ app.use(cors(CORS_OPTIONS));
 app.use(cookieParser());
 app.use(
   express.json({
-    limit: "16kb",
+    limit: "10mb",
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -45,6 +45,8 @@ import workShiftRoutes from "./routes/workShift.route.js";
 import workSessionRoutes from "./routes/workSession.route.js";
 import workloadStatsRoutes from "./routes/workloadStats.route.js";
 import documentRoutes from "./routes/document.route.js";
+import commentRoutes from "./routes/comment.route.js";
+import exportRoutes from "./routes/export.route.js";
 
 // implement routing
 app.use("/api/auth", authRoutes);
@@ -61,6 +63,8 @@ app.use("/api/work-shifts", workShiftRoutes);
 app.use("/api/work-sessions", workSessionRoutes);
 app.use("/api/workload-stats", workloadStatsRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/export",   exportRoutes);
 
 app.use(errorHandler);
 

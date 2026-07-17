@@ -10,6 +10,12 @@ const smartAssign = (id, userId, extra = {}) =>
   API.post(`/tasks/assigntask/${id}`, userId ? { userId, ...extra } : { ...extra });
 const getRecommendations = (id) => API.get(`/tasks/assigntask/${id}/recommend`);
 
+// Attachments
+const uploadAttachment   = (taskId, payload) => API.post(`/tasks/${taskId}/attachments`, payload);
+const deleteAttachment   = (taskId, attId)   => API.delete(`/tasks/${taskId}/attachments/${attId}`);
+const getDownloadUrl     = (taskId, attId)   =>
+  `${API.defaults.baseURL}/tasks/${taskId}/attachments/${attId}/download`;
+
 export {
   fetchTasks,
   createTask,
@@ -18,5 +24,7 @@ export {
   deleteTask,
   smartAssign,
   getRecommendations,
+  uploadAttachment,
+  deleteAttachment,
+  getDownloadUrl,
 };
-

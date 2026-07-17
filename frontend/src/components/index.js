@@ -9,6 +9,8 @@ import ProjectTasks from "./ProjectTasks";
 import ProjectDashboard from "./ProjectDashboard";
 import ThemeWrapper from "./ThemeWrapper";
 import ThemeToggle from "./ThemeToggle";
+import CommentSection from "./CommentSection";
+import AttachmentPanel from "./AttachmentPanel";
 
 export {
   Header,
@@ -22,4 +24,6 @@ export {
   ProjectDashboard,
   ThemeWrapper,
   ThemeToggle,
+  CommentSection,
+  AttachmentPanel,
 };

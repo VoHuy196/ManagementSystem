@@ -8,6 +8,7 @@ import smartAssign from "../utils/smartAssign.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
+import { sendTaskAssignedEmail } from "../utils/emailService.js";
 
 const getTasks = asyncHandler(async (req, res) => {
   const tasks = await Task.find()
@@ -384,8 +385,24 @@ const assignTask = asyncHandler(async (req, res) => {
 
   // Populate for response
   const populatedTask = await Task.findById(updatedTask._id)
-    .populate("assignedTo", "fullName")
+    .populate("assignedTo", "fullName email")
     .populate("createdBy", "fullName");
+
+  // ── Send email notification (non-blocking) ──────────────────────────
+  try {
+    if (assignedUser.email) {
+      const assigner = await import("../models/users.model.js").then(m => m.User.findById(req.user._id).select("fullName"));
+      sendTaskAssignedEmail({
+        toEmail:        assignedUser.email,
+        toName:         assignedUser.fullName,
+        taskTitle:      task.title,
+        taskType:       task.taskType || "Task",
+        priority:       task.priority,
+        dueDate:        task.dueDate,
+        assignedByName: assigner?.fullName || "Manager",
+      }).catch(() => {}); // fire & forget
+    }
+  } catch (_) {}
 
   // Emit socket event for real-time update
   const io = req.app.get('io');
@@ -531,6 +548,97 @@ const getTaskRecommendations = asyncHandler(async (req, res) => {
   );
 });
 
+// POST /api/tasks/:id/attachments  – upload file (base64) to task
+const uploadAttachment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { originalName, mimeType, size, data } = req.body; // data = base64 string
+
+  if (!originalName || !mimeType || !size || !data) {
+    throw new ApiError(400, "originalName, mimeType, size, and data are required");
+  }
+
+  const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+  if (size > MAX_SIZE) throw new ApiError(400, "File size exceeds 5 MB limit");
+
+  const ALLOWED_TYPES = [
+    "image/jpeg", "image/png", "image/gif", "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/plain", "text/csv",
+    "application/zip", "application/x-zip-compressed",
+  ];
+  if (!ALLOWED_TYPES.includes(mimeType)) {
+    throw new ApiError(400, `File type "${mimeType}" is not allowed`);
+  }
+
+  const task = await Task.findById(id);
+  if (!task) throw new ApiError(404, "Task not found");
+
+  task.attachments.push({
+    originalName,
+    mimeType,
+    size,
+    data,
+    uploadedBy: req.user._id,
+    uploadedAt: new Date(),
+  });
+
+  await task.save();
+
+  // Return task without attachment data to keep response small
+  const newAttachment = task.attachments[task.attachments.length - 1];
+  const safeAttachment = {
+    _id:          newAttachment._id,
+    originalName: newAttachment.originalName,
+    mimeType:     newAttachment.mimeType,
+    size:         newAttachment.size,
+    uploadedBy:   newAttachment.uploadedBy,
+    uploadedAt:   newAttachment.uploadedAt,
+  };
+
+  res.status(201).json(new ApiResponse(201, { attachment: safeAttachment }, "File uploaded successfully"));
+});
+
+// DELETE /api/tasks/:id/attachments/:attachmentId
+const deleteAttachment = asyncHandler(async (req, res) => {
+  const { id, attachmentId } = req.params;
+
+  const task = await Task.findById(id);
+  if (!task) throw new ApiError(404, "Task not found");
+
+  const att = task.attachments.id(attachmentId);
+  if (!att) throw new ApiError(404, "Attachment not found");
+
+  // Only uploader or Admin can delete
+  const isOwner = att.uploadedBy?.toString() === req.user._id.toString();
+  if (!isOwner && req.user.role !== "Admin") throw new ApiError(403, "Forbidden");
+
+  att.deleteOne();
+  await task.save();
+
+  res.status(200).json(new ApiResponse(200, {}, "Attachment deleted"));
+});
+
+// GET /api/tasks/:id/attachments/:attachmentId/download
+const downloadAttachment = asyncHandler(async (req, res) => {
+  const { id, attachmentId } = req.params;
+
+  const task = await Task.findById(id).select("attachments");
+  if (!task) throw new ApiError(404, "Task not found");
+
+  const att = task.attachments.id(attachmentId);
+  if (!att) throw new ApiError(404, "Attachment not found");
+
+  const buffer = Buffer.from(att.data, "base64");
+  res.setHeader("Content-Type", att.mimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${att.originalName}"`);
+  res.setHeader("Content-Length", buffer.length);
+  res.end(buffer);
+});
+
 export {
   getTasks,
   createTask,
@@ -539,4 +647,7 @@ export {
   deleteTask,
   assignTask,
   getTaskRecommendations,
+  uploadAttachment,
+  deleteAttachment,
+  downloadAttachment,
 };
