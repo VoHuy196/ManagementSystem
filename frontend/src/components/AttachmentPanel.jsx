@@ -40,6 +40,8 @@ const ALLOWED = [
 
 const AttachmentPanel = ({ taskId, initialAttachments = [] }) => {
   const { user } = useAuth();
+  // Support both ApiResponse shape {data:{user}} and direct user object
+  const currentUser = user?.data?.user || user;
   const fileInputRef = useRef(null);
   const [attachments, setAttachments] = useState(initialAttachments);
   const [uploading, setUploading] = useState(false);
@@ -158,9 +160,10 @@ const AttachmentPanel = ({ taskId, initialAttachments = [] }) => {
         <div className="space-y-2">
           {attachments.map((att) => {
             const canDelete =
-              att.uploadedBy === user?._id ||
-              att.uploadedBy?._id === user?._id ||
-              user?.role === "Admin";
+              att.uploadedBy === currentUser?._id ||
+              att.uploadedBy?._id === currentUser?._id ||
+              currentUser?.role === "Admin" ||
+              currentUser?.role === "Manager";
             return (
               <div
                 key={att._id}

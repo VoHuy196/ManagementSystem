@@ -9,7 +9,7 @@ const getComments = asyncHandler(async (req, res) => {
   const { taskId } = req.params;
 
   const comments = await Comment.find({ task: taskId })
-    .populate("author", "username email")
+    .populate("author", "fullName email")
     .sort({ createdAt: 1 });
 
   res.status(200).json(new ApiResponse(200, { comments }, "Comments fetched successfully"));
@@ -31,7 +31,7 @@ const createComment = asyncHandler(async (req, res) => {
     content: content.trim(),
   });
 
-  const populated = await Comment.findById(comment._id).populate("author", "username email");
+  const populated = await Comment.findById(comment._id).populate("author", "fullName email");
 
   // Realtime broadcast
   const io = req.app.get("io");
@@ -57,7 +57,7 @@ const updateComment = asyncHandler(async (req, res) => {
   comment.isEdited = true;
   await comment.save();
 
-  const populated = await Comment.findById(comment._id).populate("author", "username email");
+  const populated = await Comment.findById(comment._id).populate("author", "fullName email");
   res.status(200).json(new ApiResponse(200, { comment: populated }, "Comment updated"));
 });
 

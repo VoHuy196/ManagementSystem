@@ -126,14 +126,15 @@ const getTaskCompletionStats = asyncHandler(async (req, res) => {
 
 // GET /stats/performance – average KPI score per month (last 6 months)
 const getPerformanceStats = asyncHandler(async (req, res) => {
-  const since = dayjs().subtract(6, "month").startOf("month").toDate();
+  // Performance.period is a "YYYY-MM" string, not a Date — use string comparison
+  const since = dayjs().subtract(5, "month").startOf("month").format("YYYY-MM"); // inclusive
 
   const perf = await Performance.aggregate([
-    { $match: { createdAt: { $gte: since } } },
+    { $match: { period: { $gte: since } } },
     {
       $group: {
-        _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
-        avgScore: { $avg: "$score" },
+        _id: "$period",
+        avgScore: { $avg: "$finalScore" }, // ← correct field name
         count: { $sum: 1 },
       },
     },
@@ -142,7 +143,7 @@ const getPerformanceStats = asyncHandler(async (req, res) => {
 
   const result = perf.map((p) => ({
     month: p._id,
-    avgScore: parseFloat(p.avgScore.toFixed(1)),
+    avgScore: parseFloat((p.avgScore || 0).toFixed(1)),
     count: p.count,
   }));
 

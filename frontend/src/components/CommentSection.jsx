@@ -25,6 +25,8 @@ const Avatar = ({ name }) => {
 
 const CommentSection = ({ taskId }) => {
   const { user } = useAuth();
+  // Support both ApiResponse shape {data:{user}} and direct user object
+  const currentUser = user?.data?.user || user;
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -98,7 +100,9 @@ const CommentSection = ({ taskId }) => {
   };
 
   const isOwner = (comment) =>
-    comment.author?._id === user?._id || comment.author === user?._id;
+    comment.author?._id === currentUser?._id ||
+    comment.author === currentUser?._id ||
+    currentUser?.role === "Admin";
 
   return (
     <div className="mt-6">
@@ -122,12 +126,12 @@ const CommentSection = ({ taskId }) => {
         ) : (
           comments.map((c) => (
             <div key={c._id} className="flex gap-3">
-              <Avatar name={c.author?.username || c.author?.email || "?"} />
+              <Avatar name={c.author?.fullName || c.author?.email || "?"} />
               <div className="flex-1 min-w-0">
                 <div className="bg-gray-50 rounded-lg px-3 py-2">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-semibold text-gray-700">
-                      {c.author?.username || c.author?.email || "Unknown"}
+                      {c.author?.fullName || c.author?.email || "Unknown"}
                     </span>
                     <span className="text-xs text-gray-400">
                       {dayjs(c.createdAt).fromNow()}
@@ -190,7 +194,7 @@ const CommentSection = ({ taskId }) => {
 
       {/* Input */}
       <div className="flex gap-2 items-start">
-        <Avatar name={user?.username || user?.email || "?"} />
+        <Avatar name={currentUser?.fullName || currentUser?.email || "?"} />
         <div className="flex-1">
           <textarea
             className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
